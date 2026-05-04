@@ -6,6 +6,7 @@ import com.sqts.sbvms.Repository.VendorRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class VendorService {
@@ -21,5 +22,11 @@ public class VendorService {
         if(vendors.isEmpty())
             throw new NoVendorFoundException("No vendor found");
         return vendors;
+    }
+    public Vendor displayVendor(Long id){
+        Optional<Vendor> vendorOpt = vendorRepository.findById(id);
+        if(vendorOpt.isEmpty())
+            throw new NoVendorFoundException("Vendor not found.");
+        return vendorOpt.get();
     }
 }
