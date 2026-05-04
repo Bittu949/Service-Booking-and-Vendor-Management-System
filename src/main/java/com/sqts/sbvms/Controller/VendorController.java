@@ -7,10 +7,12 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 public class VendorController {
@@ -27,5 +29,15 @@ public class VendorController {
                         vendorService.createVendor(vendor),
                         LocalDateTime.now()),
                 HttpStatus.CREATED);
+    }
+    @GetMapping("/vendor")
+    public ResponseEntity<ApiResponse<List<Vendor>>> displayVendors(){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Data found.",
+                        vendorService.displayVendors(),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
     }
 }

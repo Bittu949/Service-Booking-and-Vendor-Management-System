@@ -24,7 +24,7 @@ public class ServicesController {
                         "Service added.",
                         servicesService.addService(service),
                         LocalDateTime.now()),
-                HttpStatus.FOUND);
+                HttpStatus.CREATED);
     }
     @GetMapping("/services")
     public ResponseEntity<ApiResponse<List<Service>>> displayServices(){
@@ -34,7 +34,7 @@ public class ServicesController {
                         "Services found.",
                         servicesService.displayServices(),
                         LocalDateTime.now()),
-                HttpStatus.FOUND);
+                HttpStatus.OK);
     }
     @PutMapping("/services/{id}")
     public ResponseEntity<ApiResponse<Service>> updateService(@PathVariable Long id,
@@ -45,6 +45,6 @@ public class ServicesController {
                         "Service updated.",
                         servicesService.updateService(id, updatedService),
                         LocalDateTime.now()),
-                HttpStatus.FOUND);
+                HttpStatus.OK);
     }
 }

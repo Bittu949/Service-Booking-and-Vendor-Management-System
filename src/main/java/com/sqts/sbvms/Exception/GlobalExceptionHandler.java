@@ -54,4 +54,14 @@ public class GlobalExceptionHandler {
                         LocalDateTime.now()),
                 HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(NoVendorFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleNoVendorFoundException(NoVendorFoundException ex){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()),
+                HttpStatus.NOT_FOUND);
+    }
 }
