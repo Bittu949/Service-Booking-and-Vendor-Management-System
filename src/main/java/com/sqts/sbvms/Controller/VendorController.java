@@ -3,6 +3,7 @@ package com.sqts.sbvms.Controller;
 import com.sqts.sbvms.Dto.ApiResponse;
 import com.sqts.sbvms.Entity.Vendor;
 import com.sqts.sbvms.Service.VendorService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,7 +19,7 @@ public class VendorController {
         this.vendorService = vendorService;
     }
     @PostMapping("/vendor")
-    public ResponseEntity<ApiResponse<Vendor>> createVendor(@RequestBody Vendor vendor){
+    public ResponseEntity<ApiResponse<Vendor>> createVendor(@Valid @RequestBody Vendor vendor){
         return new ResponseEntity<>(
                 new ApiResponse<>(
                         true,
