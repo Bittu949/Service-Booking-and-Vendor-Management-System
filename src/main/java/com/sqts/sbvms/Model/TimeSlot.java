@@ -1,5 +1,6 @@
 package com.sqts.sbvms.Model;
 
+import com.sqts.sbvms.Exception.InvalidTimeSlotException;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +16,7 @@ public class TimeSlot {
     LocalTime endTime;
     public TimeSlot(LocalTime startTime, LocalTime endTime) {
         if (startTime.isAfter(endTime)) {
-            throw new IllegalArgumentException("Start time must be before end time");
+            throw new InvalidTimeSlotException("Start time must be before end time");
         }
         this.startTime = startTime;
         this.endTime = endTime;

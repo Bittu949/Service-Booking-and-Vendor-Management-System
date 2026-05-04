@@ -64,4 +64,14 @@ public class GlobalExceptionHandler {
                         LocalDateTime.now()),
                 HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(InvalidTimeSlotException.class)
+    public ResponseEntity<ApiResponse<Object>> handleInvalidTimeSlotException(InvalidTimeSlotException ex){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()),
+                HttpStatus.BAD_REQUEST);
+    }
 }
