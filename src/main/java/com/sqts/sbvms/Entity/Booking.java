@@ -1,6 +1,6 @@
 package com.sqts.sbvms.Entity;
 
-import com.sqts.sbvms.Dto.TimeSlot;
+import com.sqts.sbvms.Model.TimeSlot;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,13 +17,16 @@ import java.time.LocalDate;
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    private Long id;
     @ManyToOne
-    User userId;
+    @JoinColumn(name = "userId")
+    User user;
     @ManyToOne
-    Service serviceId;
+    @JoinColumn(name = "serviceId")
+    Service service;
     @ManyToOne
-    Vendor vendorId;
+    @JoinColumn(name = "vendorId")
+    Vendor vendor;
     LocalDate bookingDate;
     @Embedded
     TimeSlot timeSlot;
