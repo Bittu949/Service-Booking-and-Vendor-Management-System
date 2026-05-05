@@ -7,10 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,16 +28,16 @@ public class VendorController {
                         LocalDateTime.now()),
                 HttpStatus.CREATED);
     }
-    @GetMapping("/vendor")
-    public ResponseEntity<ApiResponse<List<Vendor>>> displayVendors(){
-        return new ResponseEntity<>(
-                new ApiResponse<>(
-                        true,
-                        "Data found.",
-                        vendorService.displayVendors(),
-                        LocalDateTime.now()),
-                HttpStatus.OK);
-    }
+//    @GetMapping("/vendor")
+//    public ResponseEntity<ApiResponse<List<Vendor>>> displayVendors(){
+//        return new ResponseEntity<>(
+//                new ApiResponse<>(
+//                        true,
+//                        "Data found.",
+//                        vendorService.displayVendors(),
+//                        LocalDateTime.now()),
+//                HttpStatus.OK);
+//    }
     @GetMapping("/vendor/{id}")
     public ResponseEntity<ApiResponse<Vendor>> displayVendor(@PathVariable Long id){
         return new ResponseEntity<>(
@@ -48,6 +45,18 @@ public class VendorController {
                         true,
                         "Data found.",
                         vendorService.displayVendor(id),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
+    }
+    @GetMapping("/vendor")
+    public ResponseEntity<ApiResponse<List<Vendor>>> filterVendor(@RequestParam(required = false) String name,
+                                                            @RequestParam(required = false) String skills){
+        List<Vendor> vendors = vendorService.filterVendor(name, skills);
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        vendors.isEmpty() ? "No data found." : "Data found.",
+                        vendors,
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }
