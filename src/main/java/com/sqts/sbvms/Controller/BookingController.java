@@ -35,8 +35,18 @@ public class BookingController {
         return new ResponseEntity<>(
                 new ApiResponse<>(
                         true,
-                        "Bookings found",
+                        "Bookings found.",
                         bookingService.showBookingsOfUser(userId),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
+    }
+    @GetMapping("/bookings/vendor/{vendorId}")
+    public ResponseEntity<ApiResponse<List<Booking>>> showBookingsOfVendor(@PathVariable Long vendorId){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Bookings found.",
+                        bookingService.showBookingsOfVendor(vendorId),
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }

@@ -96,4 +96,12 @@ public class BookingService {
             throw new BookingsNotFoundException("No booking found.");
         return bookings;
     }
+    public List<Booking> showBookingsOfVendor(Long vendorId){
+        if(vendorId==null)
+            throw new InvalidInputException("Vendor Id not provided.");
+        List<Booking> bookings = bookingRepository.findAllByVendorId(vendorId);
+        if(bookings.isEmpty())
+            throw new BookingsNotFoundException("No booking found.");
+        return bookings;
+    }
 }
