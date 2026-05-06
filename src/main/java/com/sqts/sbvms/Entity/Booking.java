@@ -37,4 +37,6 @@ public class Booking {
     @Embedded
     @NotNull
     TimeSlot timeSlot;
+    @NotBlank
+    String status;
 }
