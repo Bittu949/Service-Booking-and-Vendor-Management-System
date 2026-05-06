@@ -114,4 +114,34 @@ public class GlobalExceptionHandler {
                         LocalDateTime.now()),
                 HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(BookingNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleBookingNotFoundException(BookingNotFoundException ex){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()),
+                HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(InvalidBookingStatusException.class)
+    public ResponseEntity<ApiResponse<Object>> handleInvalidBookingStatusException(InvalidBookingStatusException ex){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()),
+                HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(InvalidVendorException.class)
+    public ResponseEntity<ApiResponse<Object>> handleInvalidVendorException(InvalidVendorException ex){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()),
+                HttpStatus.BAD_REQUEST);
+    }
 }

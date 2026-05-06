@@ -30,7 +30,6 @@ public class Booking {
     Service service;
     @ManyToOne
     @JoinColumn(name = "vendorId")
-    @NotNull
     Vendor vendor;
     @NotNull
     LocalDate bookingDate;

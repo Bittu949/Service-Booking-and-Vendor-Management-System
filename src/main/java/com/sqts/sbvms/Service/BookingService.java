@@ -1,6 +1,7 @@
 package com.sqts.sbvms.Service;
 
 import com.sqts.sbvms.Dto.BookingRequest;
+import com.sqts.sbvms.Dto.VendorAssignmentRequest;
 import com.sqts.sbvms.Entity.Booking;
 import com.sqts.sbvms.Entity.User;
 import com.sqts.sbvms.Entity.Vendor;
@@ -12,6 +13,7 @@ import com.sqts.sbvms.Repository.VendorRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Book;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +38,6 @@ public class BookingService {
         if(request==null ||
                 request.getUserId()==null ||
                 request.getServiceId()==null ||
-                request.getVendorId()==null ||
                 request.getTimeSlot()==null ||
                 request.getBookingDate()==null)
             throw new InvalidInputException("Please fill all the fields.");
@@ -49,43 +50,86 @@ public class BookingService {
         if(serviceOpt.isEmpty())
             throw new ServiceNotFoundException("Service not found.");
 
-        Optional<Vendor> vendorOpt = vendorRepository.findById(request.getVendorId());
-        if(vendorOpt.isEmpty())
+        Booking booking = new Booking();
+        booking.setUser(userOpt.get());
+        booking.setService(serviceOpt.get());
+        booking.setBookingDate(request.getBookingDate());
+        booking.setTimeSlot(request.getTimeSlot());
+        booking.setStatus("PENDING");
+        return bookingRepository.save(booking);
+    }
+    @Transactional
+    public Booking assignVendor(VendorAssignmentRequest request){
+
+        if(request == null ||
+                request.getBookingId() == null ||
+                request.getVendorId() == null){
+            throw new InvalidInputException("Please fill all the fields.");
+        }
+
+        Long bookingId = request.getBookingId();
+        Long vendorId = request.getVendorId();
+
+        Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
+
+        if(bookingOpt.isEmpty()){
+            throw new BookingNotFoundException("Booking not found.");
+        }
+
+        Optional<Vendor> vendorOpt = vendorRepository.findById(vendorId);
+
+        if(vendorOpt.isEmpty()){
             throw new VendorNotFoundException("Vendor not found.");
+        }
 
-        List<Booking> existingBookings =
-                bookingRepository.findBookingsForUpdate(
-                        vendorOpt.get(),
-                        request.getBookingDate()
-                );
+        Booking booking = bookingOpt.get();
+        Vendor vendor = vendorOpt.get();
 
-        LocalTime startTime = request.getTimeSlot().getStartTime();
-        LocalTime endTime = request.getTimeSlot().getEndTime();
-
-        if(startTime==null || endTime==null)
-            throw new InvalidTimeSlotException("Start time and end time are required.");
-
-        if (!startTime.isBefore(endTime)) {
-            throw new InvalidTimeSlotException(
-                    "Start time must be before end time."
+        // Booking should be pending before assignment
+        if(!booking.getStatus().equals("PENDING")){
+            throw new InvalidBookingStatusException(
+                    "Vendor can only be assigned to pending bookings."
             );
         }
 
+        // Optional: validate vendor skills
+        if(vendor.getSkills() == null ||
+                !vendor.getSkills().toLowerCase()
+                        .contains(booking.getService().getName().toLowerCase())){
+
+            throw new InvalidVendorException(
+                    "Vendor does not support this service."
+            );
+        }
+
+        // Fetch confirmed bookings of vendor for same date
+        List<Booking> existingBookings =
+                bookingRepository.findConfirmedBookingsForUpdate(
+                        vendor,
+                        booking.getBookingDate(),
+                        "CONFIRMED"
+                );
+
+        LocalTime startTime = booking.getTimeSlot().getStartTime();
+        LocalTime endTime = booking.getTimeSlot().getEndTime();
+
+        // Check overlap
         boolean overlapExists = existingBookings.stream()
-                                            .anyMatch(
-                                                    b -> startTime.isBefore(b.getTimeSlot().getEndTime()) &&
-                                                            endTime.isAfter(b.getTimeSlot().getStartTime()));
-        if (overlapExists) {
+                .anyMatch(
+                        b -> startTime.isBefore(b.getTimeSlot().getEndTime()) &&
+                                endTime.isAfter(b.getTimeSlot().getStartTime())
+                );
+
+        if(overlapExists){
             throw new InvalidTimeSlotException(
                     "Vendor already booked for this time slot."
             );
         }
-        Booking booking = new Booking();
-        booking.setUser(userOpt.get());
-        booking.setService(serviceOpt.get());
-        booking.setVendor(vendorOpt.get());
-        booking.setBookingDate(request.getBookingDate());
-        booking.setTimeSlot(request.getTimeSlot());
+
+        // Assign vendor
+        booking.setVendor(vendor);
+        booking.setStatus("CONFIRMED");
+
         return bookingRepository.save(booking);
     }
     public List<Booking> showBookingsOfUser(Long userId){

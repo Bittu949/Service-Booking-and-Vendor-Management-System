@@ -20,8 +20,6 @@ public class BookingRequest {
     @NotNull
     Long serviceId;
     @NotNull
-    Long vendorId;
-    @NotNull
     LocalDate bookingDate;
     @NotNull
     TimeSlot timeSlot;

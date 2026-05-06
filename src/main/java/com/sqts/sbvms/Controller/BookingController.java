@@ -2,6 +2,7 @@ package com.sqts.sbvms.Controller;
 
 import com.sqts.sbvms.Dto.ApiResponse;
 import com.sqts.sbvms.Dto.BookingRequest;
+import com.sqts.sbvms.Dto.VendorAssignmentRequest;
 import com.sqts.sbvms.Entity.Booking;
 import com.sqts.sbvms.Service.BookingService;
 import jakarta.validation.Valid;
@@ -27,6 +28,16 @@ public class BookingController {
                         true,
                         "Booking created",
                         bookingService.createBooking(request),
+                        LocalDateTime.now()),
+                HttpStatus.CREATED);
+    }
+    @PutMapping("/bookings")
+    public ResponseEntity<ApiResponse<Booking>> assignVendor(@Valid @RequestBody VendorAssignmentRequest request){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Booking created",
+                        bookingService.assignVendor(request),
                         LocalDateTime.now()),
                 HttpStatus.CREATED);
     }

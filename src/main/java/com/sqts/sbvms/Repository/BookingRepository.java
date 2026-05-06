@@ -12,17 +12,20 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
+    List<Booking> findAllByUserId(Long userId);
+    List<Booking> findAllByVendorId(Long vendorId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
        SELECT b
        FROM Booking b
        WHERE b.vendor = :vendor
        AND b.bookingDate = :bookingDate
+       AND b.status = :status
        """)
-    List<Booking> findBookingsForUpdate(
+    List<Booking> findConfirmedBookingsForUpdate(
             @Param("vendor") Vendor vendor,
-            @Param("bookingDate") LocalDate bookingDate
+            @Param("bookingDate") LocalDate bookingDate,
+            @Param("status") String status
     );
-    List<Booking> findAllByUserId(Long userId);
-    List<Booking> findAllByVendorId(Long vendorId);
 }
