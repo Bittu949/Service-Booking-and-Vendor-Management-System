@@ -104,4 +104,14 @@ public class GlobalExceptionHandler {
                         LocalDateTime.now()),
                 HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(BookingsNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleBookingsNotFoundException(BookingsNotFoundException ex){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()),
+                HttpStatus.NOT_FOUND);
+    }
 }

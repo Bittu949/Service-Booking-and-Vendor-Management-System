@@ -88,4 +88,12 @@ public class BookingService {
         booking.setTimeSlot(request.getTimeSlot());
         return bookingRepository.save(booking);
     }
+    public List<Booking> showBookingsOfUser(Long userId){
+        if(userId==null)
+            throw new InvalidInputException("User Id not provided.");
+        List<Booking> bookings = bookingRepository.findAllByUserId(userId);
+        if(bookings.isEmpty())
+            throw new BookingsNotFoundException("No booking found.");
+        return bookings;
+    }
 }

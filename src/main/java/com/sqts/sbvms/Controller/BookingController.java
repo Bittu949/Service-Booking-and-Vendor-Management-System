@@ -7,12 +7,12 @@ import com.sqts.sbvms.Service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Book;
 import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 public class BookingController {
@@ -29,5 +29,15 @@ public class BookingController {
                         bookingService.createBooking(request),
                         LocalDateTime.now()),
                 HttpStatus.CREATED);
+    }
+    @GetMapping("/bookings/user/{userId}")
+    public ResponseEntity<ApiResponse<List<Booking>>> showBookingsOfUser(@PathVariable Long userId){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Bookings found",
+                        bookingService.showBookingsOfUser(userId),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
     }
 }
