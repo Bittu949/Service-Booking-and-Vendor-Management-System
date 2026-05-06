@@ -84,4 +84,14 @@ public class GlobalExceptionHandler {
                         LocalDateTime.now()),
                 HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(ServiceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleServiceNotFoundException(ServiceNotFoundException ex){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()),
+                HttpStatus.BAD_REQUEST);
+    }
 }
