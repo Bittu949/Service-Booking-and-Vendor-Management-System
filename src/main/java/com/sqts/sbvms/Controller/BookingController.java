@@ -31,7 +31,7 @@ public class BookingController {
                         LocalDateTime.now()),
                 HttpStatus.CREATED);
     }
-    @PutMapping("/bookings")
+    @PostMapping("/bookings/assignVendor")
     public ResponseEntity<ApiResponse<Booking>> assignVendor(@Valid @RequestBody VendorAssignmentRequest request){
         return new ResponseEntity<>(
                 new ApiResponse<>(
