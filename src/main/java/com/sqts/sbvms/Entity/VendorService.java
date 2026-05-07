@@ -2,6 +2,7 @@ package com.sqts.sbvms.Entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +27,7 @@ public class VendorService {
     @NotNull
     ServiceCategory serviceCategory;
     @NotNull
+    @Positive
     Long price;
     @NotNull
     Duration duration;

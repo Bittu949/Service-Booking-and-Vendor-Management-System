@@ -144,4 +144,24 @@ public class GlobalExceptionHandler {
                         LocalDateTime.now()),
                 HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(WeakPasswordException.class)
+    public ResponseEntity<ApiResponse<Object>> handleWeakPasswordException(WeakPasswordException ex){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()),
+                HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Object>> handleUserAlreadyExistsException(UserAlreadyExistsException ex){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()),
+                HttpStatus.BAD_REQUEST);
+    }
 }
