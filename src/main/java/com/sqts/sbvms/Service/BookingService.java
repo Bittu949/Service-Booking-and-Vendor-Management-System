@@ -148,4 +148,7 @@ public class BookingService {
             throw new BookingsNotFoundException("No booking found.");
         return bookings;
     }
+    public List<Vendor> showVendorsAvailableForParticularBooking(Long BookingId){
+
+    }
 }

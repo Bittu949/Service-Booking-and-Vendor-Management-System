@@ -4,6 +4,7 @@ import com.sqts.sbvms.Dto.ApiResponse;
 import com.sqts.sbvms.Dto.BookingRequest;
 import com.sqts.sbvms.Dto.VendorAssignmentRequest;
 import com.sqts.sbvms.Entity.Booking;
+import com.sqts.sbvms.Entity.Vendor;
 import com.sqts.sbvms.Service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -58,6 +59,16 @@ public class BookingController {
                         true,
                         "Bookings found.",
                         bookingService.showBookingsOfVendor(vendorId),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
+    }
+    @GetMapping("/bookings/{bookingId}/vendors")
+    public ResponseEntity<ApiResponse<List<Vendor>>> showVendorsAvailableForParticularBooking(@PathVariable Long bookingId){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Vendors found.",
+                        bookingService.showVendorsAvailableForParticularBooking(bookingId),
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }
