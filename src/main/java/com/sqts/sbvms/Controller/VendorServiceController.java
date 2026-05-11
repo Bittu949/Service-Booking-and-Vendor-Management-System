@@ -1,6 +1,7 @@
 package com.sqts.sbvms.Controller;
 
 import com.sqts.sbvms.Dto.ApiResponse;
+import com.sqts.sbvms.Dto.DisplayVendorDetails;
 import com.sqts.sbvms.Dto.VendorCreationRequest;
 import com.sqts.sbvms.Dto.VendorCreationResponse;
 import com.sqts.sbvms.Entity.User;
@@ -9,9 +10,7 @@ import com.sqts.sbvms.Service.VendorServiceService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
@@ -30,5 +29,15 @@ public class VendorServiceController {
                         vendorServiceService.createVendor(request),
                         LocalDateTime.now()),
                 HttpStatus.CREATED);
+    }
+    @GetMapping("/vendor/{id}")
+    public ResponseEntity<ApiResponse<DisplayVendorDetails>> displayVendor(@PathVariable Long id){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Data found.",
+                        vendorServiceService.displayVendor(id),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
     }
 }

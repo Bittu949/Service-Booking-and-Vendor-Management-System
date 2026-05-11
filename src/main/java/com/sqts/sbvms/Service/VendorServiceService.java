@@ -1,16 +1,15 @@
 package com.sqts.sbvms.Service;
 
+import com.sqts.sbvms.Dto.DisplayVendorDetails;
 import com.sqts.sbvms.Dto.VendorCreationRequest;
 import com.sqts.sbvms.Dto.VendorCreationResponse;
+import com.sqts.sbvms.Dto.VendorServiceDetails;
 import com.sqts.sbvms.Entity.ServiceCategory;
 import com.sqts.sbvms.Entity.User;
 import com.sqts.sbvms.Entity.Vendor;
 import com.sqts.sbvms.Entity.VendorService;
 import com.sqts.sbvms.Enum.Role;
-import com.sqts.sbvms.Exception.InvalidInputException;
-import com.sqts.sbvms.Exception.ServiceNotFoundException;
-import com.sqts.sbvms.Exception.UserAlreadyExistsException;
-import com.sqts.sbvms.Exception.WeakPasswordException;
+import com.sqts.sbvms.Exception.*;
 import com.sqts.sbvms.Repository.ServiceCategoryRepository;
 import com.sqts.sbvms.Repository.UserRepository;
 import com.sqts.sbvms.Repository.VendorRepository;
@@ -19,6 +18,8 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,5 +77,30 @@ public class VendorServiceService {
         response.setDuration(vendorService.getDuration());
 
         return response;
+    }
+    public DisplayVendorDetails displayVendor(Long id) {
+        Optional<Vendor> vendorOpt = vendorRepository.findById(id);
+        if (vendorOpt.isEmpty())
+            throw new NoVendorFoundException("Vendor not found.");
+        User user = vendorOpt.get().getUser();
+        String name = user.getName();
+        String email = user.getEmail();
+        DisplayVendorDetails displayVendorDetails = new DisplayVendorDetails();
+        List<VendorService> providedServices = vendorServiceRepository.findByVendorId(id);
+        List<VendorServiceDetails> serviceDetails = new ArrayList<>();
+        for (VendorService service : providedServices) {
+            VendorServiceDetails vendorServiceDetails = new VendorServiceDetails();
+            long price = service.getPrice();
+            Duration duration = service.getDuration();
+            ServiceCategory serviceCategory = service.getServiceCategory();
+            vendorServiceDetails.setPrice(price);
+            vendorServiceDetails.setDuration(duration);
+            vendorServiceDetails.setServiceCategory(serviceCategory);
+            serviceDetails.add(vendorServiceDetails);
+        }
+        displayVendorDetails.setVendorName(name);
+        displayVendorDetails.setVendorEmail(email);
+        displayVendorDetails.setVendorServiceDetails(serviceDetails);
+        return displayVendorDetails;
     }
 }
