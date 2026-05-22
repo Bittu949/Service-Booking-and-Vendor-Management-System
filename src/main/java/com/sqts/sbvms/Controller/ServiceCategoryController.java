@@ -48,4 +48,14 @@ public class ServiceCategoryController {
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }
+    @DeleteMapping("/services/{id}")
+    public ResponseEntity<ApiResponse<ServiceCategory>> deleteService(@PathVariable(name = "id") Long serviceId){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Service deleted.",
+                        serviceCategoryService.deleteService(serviceId),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
+    }
 }

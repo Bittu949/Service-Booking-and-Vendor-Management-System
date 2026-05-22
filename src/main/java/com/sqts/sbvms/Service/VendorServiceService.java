@@ -94,10 +94,9 @@ public class VendorServiceService {
         return response;
     }
     public DisplayVendorDetails displayVendor(Long id) {
-        Optional<Vendor> vendorOpt = vendorRepository.findById(id);
-        if (vendorOpt.isEmpty())
-            throw new NoVendorFoundException("Vendor not found.");
-        User user = vendorOpt.get().getUser();
+        Vendor vendor = vendorRepository.findById(id).orElseThrow(() -> new NoVendorFoundException("Vendor not found"));
+
+        User user = vendor.getUser();
         String name = user.getName();
         String email = user.getEmail();
         DisplayVendorDetails displayVendorDetails = new DisplayVendorDetails();

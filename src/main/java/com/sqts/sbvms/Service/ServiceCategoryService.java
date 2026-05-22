@@ -38,4 +38,10 @@ public class ServiceCategoryService {
         serviceCategoryRepository.save(service);
         return service;
     }
+    public ServiceCategory deleteService(Long serviceId){
+        ServiceCategory serviceCategory = serviceCategoryRepository.findById(serviceId)
+                .orElseThrow(() -> new NoServiceFoundException("Service not found."));
+        serviceCategoryRepository.delete(serviceCategory);
+        return serviceCategory;
+    }
 }
