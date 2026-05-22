@@ -117,4 +117,8 @@ public class VendorServiceService {
         displayVendorDetails.setVendorServiceDetails(serviceDetails);
         return displayVendorDetails;
     }
+    public VendorUpdateResponse updateVendor(VendorUpdateRequest request){
+        VendorUpdateResponse response = new VendorUpdateResponse();
+        return response;
+    }
 }
