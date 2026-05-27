@@ -114,4 +114,16 @@ public class VendorServiceController {
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }
+    @GetMapping("/vendors/search")
+    public ResponseEntity<ApiResponse<List<SearchResponse>>> searchByVendorOrService(@RequestParam(required = false) String vendorName,
+                                                                                        @RequestParam(required = false) String serviceName){
+        List<SearchResponse> responses = vendorServiceService.searchByVendorOrService(vendorName, serviceName);
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        responses.isEmpty() ? "No data found" : "Data found",
+                        responses,
+                        LocalDateTime.now()),
+                HttpStatus.OK);
+    }
 }

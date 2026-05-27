@@ -198,4 +198,28 @@ public class VendorServiceService {
         response.setDuration(vendorService.getDuration());
         return response;
     }
+    public List<SearchResponse> searchByVendorOrService(String vendorName, String serviceName){
+        List<VendorService> vendorServices = vendorServiceRepository.findAll();
+        List<SearchResponse> responses = new ArrayList<>();
+
+        if(vendorName != null)
+            vendorServices = vendorServices.stream().filter(v -> v.getVendor().getUser() != null &&
+                                                                 v.getVendor().getUser().getName() != null &&
+                                                                 v.getVendor().getUser().getName().toLowerCase().contains(vendorName.toLowerCase())).toList();
+        if(serviceName != null)
+            vendorServices = vendorServices.stream().filter(v -> v.getServiceCategory() != null &&
+                                                                 v.getServiceCategory().getServiceName() != null &&
+                                                                 v.getServiceCategory().getServiceName().toLowerCase().contains(serviceName.toLowerCase())).toList();
+        for(VendorService service : vendorServices){
+            SearchResponse searchResponse = new SearchResponse();
+            searchResponse.setVendorId(service.getVendor().getId());
+            searchResponse.setVendorName(service.getVendor().getUser().getName());
+            searchResponse.setVendorEmail(service.getVendor().getUser().getEmail());
+            searchResponse.setServiceName(service.getServiceCategory().getServiceName());
+            searchResponse.setPrice(service.getPrice());
+            searchResponse.setDuration(service.getDuration());
+            responses.add(searchResponse);
+        }
+        return responses;
+    }
 }
