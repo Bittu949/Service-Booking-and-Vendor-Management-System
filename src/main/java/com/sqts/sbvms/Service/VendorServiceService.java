@@ -240,4 +240,15 @@ public class VendorServiceService {
         response.setDuration(vendorService.getDuration());
         return response;
     }
+    public VendorSummaryResponse viewDashboardSummary(Long vendorId){
+        Vendor vendor = vendorRepository.findById(vendorId).orElseThrow(() -> new VendorNotFoundException("Vendor not found."));
+        Long count = vendorServiceRepository.countByVendor_id(vendorId);
+
+        VendorSummaryResponse response = new VendorSummaryResponse();
+        response.setVendorId(vendor.getId());
+        response.setVendorName(vendor.getUser().getName());
+        response.setVendorEmail(vendor.getUser().getEmail());
+        response.setTotalAssignedServices(count);
+        return response;
+    }
 }

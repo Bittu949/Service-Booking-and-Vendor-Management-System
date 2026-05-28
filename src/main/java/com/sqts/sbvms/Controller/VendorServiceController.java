@@ -137,4 +137,14 @@ public class VendorServiceController {
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }
+    @GetMapping("/vendor/{id}/summary")
+    public ResponseEntity<ApiResponse<VendorSummaryResponse>> viewDashboardSummary(@PathVariable(name = "id") Long vendorId){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Data found",
+                        vendorServiceService.viewDashboardSummary(vendorId),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
+    }
 }
