@@ -147,4 +147,24 @@ public class VendorServiceController {
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }
+    @GetMapping("/vendors/count")
+    public ResponseEntity<ApiResponse<Long>> countTotalVendors(){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Data found",
+                        vendorServiceService.countTotalVendors(),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
+    }
+    @GetMapping("/services/count")
+    public ResponseEntity<ApiResponse<Long>> countTotalServices(){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Data found",
+                        vendorServiceService.countTotalServices(),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
+    }
 }

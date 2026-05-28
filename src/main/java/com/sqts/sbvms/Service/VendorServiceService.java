@@ -251,4 +251,10 @@ public class VendorServiceService {
         response.setTotalAssignedServices(count);
         return response;
     }
+    public Long countTotalVendors(){
+        return vendorRepository.count();
+    }
+    public Long countTotalServices(){
+        return serviceCategoryRepository.count();
+    }
 }
