@@ -222,4 +222,22 @@ public class VendorServiceService {
         }
         return responses;
     }
+    public SearchResponse getSingleAssignedServiceOfVendor(Long vendorId, Long serviceId){
+        Vendor vendor = vendorRepository.findById(vendorId).orElseThrow(() -> new VendorNotFoundException("Vendor not found."));
+
+        ServiceCategory service = serviceCategoryRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException("Service not found."));
+        VendorService vendorService = vendorServiceRepository.findByVendor_idAndServiceCategory_id(vendor.getId(), service.getId());
+
+        if(vendorService == null)
+            throw new ServiceAssignmentNotFoundException("Service assignment not found.");
+
+        SearchResponse response = new SearchResponse();
+        response.setVendorId(vendor.getUser().getId());
+        response.setVendorName(vendor.getUser().getName());
+        response.setVendorEmail(vendor.getUser().getEmail());
+        response.setServiceName(service.getServiceName());
+        response.setPrice(vendorService.getPrice());
+        response.setDuration(vendorService.getDuration());
+        return response;
+    }
 }

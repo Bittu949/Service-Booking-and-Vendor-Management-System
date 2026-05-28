@@ -126,4 +126,15 @@ public class VendorServiceController {
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }
+    @GetMapping("/vendor/{vendorId}/services/{serviceId}")
+    public ResponseEntity<ApiResponse<SearchResponse>> getSingleAssignedServiceOfVendor(@PathVariable(name = "vendorId") Long vendorId,
+                                                                                        @PathVariable(name = "serviceId") Long serviceId){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Data found",
+                        vendorServiceService.getSingleAssignedServiceOfVendor(vendorId, serviceId),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
+    }
 }
