@@ -60,6 +60,14 @@ public class ServiceCategoryService {
         List<VendorService> vendorServices = vendorServiceRepository.findByServiceCategory(service);
         if(vendorServices.isEmpty())
             throw new ServiceAssignmentNotFoundException("No vendor provides this service.");
+        vendorServices.sort((v1, v2) -> {
+            if(v1.getPrice() > v2.getPrice())
+                return 1;
+            else if (v1.getPrice() < v2.getPrice())
+                return -1;
+            else
+                return 0;
+        });
         List<VendorByServiceResponse> vendorByServiceResponses = new ArrayList<>();
         for(VendorService vendorService : vendorServices){
             VendorByServiceResponse response = new VendorByServiceResponse();
