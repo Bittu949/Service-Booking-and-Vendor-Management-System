@@ -55,7 +55,7 @@ public class ServiceCategoryService {
         return serviceCategoryRepository.findById(serviceId)
                 .orElseThrow(() -> new NoServiceFoundException("Service not found."));
     }
-    public List<VendorByServiceResponse> getVendorsByService(Long serviceId, Long minPrice, Long maxPrice){
+    public List<VendorByServiceResponse> getVendorsByService(Long serviceId, Long minPrice, Long maxPrice, String sortBy){
         ServiceCategory service = serviceCategoryRepository.findById(serviceId)
                                     .orElseThrow(() -> new ServiceNotFoundException("Service not found."));
         List<VendorService> vendorServices = vendorServiceRepository.findByServiceCategory(service);
@@ -71,7 +71,11 @@ public class ServiceCategoryService {
         if(maxPrice != null)
             vendorServices = new ArrayList<>(vendorServices.stream().filter(v -> v.getPrice() <= maxPrice).toList());
 
-        vendorServices.sort(Comparator.comparing(VendorService::getPrice));
+        if(sortBy != null && sortBy.equalsIgnoreCase("price"))
+            vendorServices.sort(Comparator.comparing(VendorService::getPrice));
+        if(sortBy != null && sortBy.equalsIgnoreCase("name"))
+            vendorServices.sort(Comparator.comparing(v -> v.getVendor().getUser().getName()));
+
         List<VendorByServiceResponse> vendorByServiceResponses = new ArrayList<>();
         for(VendorService vendorService : vendorServices){
             VendorByServiceResponse response = new VendorByServiceResponse();

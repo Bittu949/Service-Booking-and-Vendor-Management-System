@@ -72,13 +72,15 @@ public class ServiceCategoryController {
     @GetMapping("/services/{id}/vendors")
     public ResponseEntity<ApiResponse<List<VendorByServiceResponse>>> getVendorsByService(@PathVariable(name = "id") Long serviceId,
                                                                                           @RequestParam(name = "minPrice", required = false) Long minPrice,
-                                                                                          @RequestParam(name = "maxPrice", required = false) Long maxPrice){
+                                                                                          @RequestParam(name = "maxPrice", required = false) Long maxPrice,
+                                                                                          @RequestParam(name = "sortBy", required = false) String sortBy){
         return new ResponseEntity<>(
                 new ApiResponse<>(
                         true,
                         "Data found.",
-                        serviceCategoryService.getVendorsByService(serviceId, minPrice, maxPrice),
+                        serviceCategoryService.getVendorsByService(serviceId, minPrice, maxPrice, sortBy),
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }
+
 }
