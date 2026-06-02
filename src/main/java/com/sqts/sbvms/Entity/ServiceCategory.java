@@ -1,5 +1,6 @@
 package com.sqts.sbvms.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -27,5 +28,6 @@ public class ServiceCategory {
     @OneToMany(mappedBy = "serviceCategory",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
+    @JsonIgnore
     private List<VendorService> vendorServices;
 }
