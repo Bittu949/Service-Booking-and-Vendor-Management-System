@@ -180,7 +180,8 @@ public class VendorServiceService {
         VendorDeletionResponse response = new VendorDeletionResponse();
         response.setVendorName(vendor.getUser().getName());
         response.setVendorEmail(vendor.getUser().getEmail());
-        vendorRepository.delete(vendor);
+        vendor.setStatus(VendorStatus.INACTIVE);
+        vendorRepository.save(vendor);
         return response;
     }
     public void removeAssignedServiceFromVendor(Long vendorId, Long serviceId){
@@ -195,6 +196,8 @@ public class VendorServiceService {
         VendorService vendorService = vendorServiceRepository.findByVendor_idAndServiceCategory_id(vendorId, serviceId);
         if(vendorService == null)
             throw new ServiceNotFoundException("Service not found.");
+        if(vendorService.getVendor().getStatus() != VendorStatus.ACTIVE)
+            throw new InvalidVendorStatusException("Vendor is not active.");
         if(request.getDuration() != null)
             vendorService.setDuration(request.getDuration());
         if(request.getPrice() != null)
@@ -210,6 +213,10 @@ public class VendorServiceService {
     public List<SearchResponse> searchByVendorOrService(String vendorName, String serviceName){
         List<VendorService> vendorServices = vendorServiceRepository.findAll();
         List<SearchResponse> responses = new ArrayList<>();
+
+        vendorServices = vendorServices.stream()
+                .filter(v -> v.getVendor().getStatus() == VendorStatus.ACTIVE)
+                .toList();
 
         if(vendorName != null)
             vendorServices = vendorServices.stream().filter(v -> v.getVendor().getUser() != null &&
