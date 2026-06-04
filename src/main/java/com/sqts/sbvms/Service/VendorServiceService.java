@@ -6,6 +6,7 @@ import com.sqts.sbvms.Entity.User;
 import com.sqts.sbvms.Entity.Vendor;
 import com.sqts.sbvms.Entity.VendorService;
 import com.sqts.sbvms.Enum.Role;
+import com.sqts.sbvms.Enum.VendorStatus;
 import com.sqts.sbvms.Exception.*;
 import com.sqts.sbvms.Repository.ServiceCategoryRepository;
 import com.sqts.sbvms.Repository.UserRepository;
@@ -51,6 +52,7 @@ public class VendorServiceService {
 
         Vendor vendor = new Vendor();
         vendor.setUser(user);
+        vendor.setStatus(VendorStatus.ACTIVE);
         vendorRepository.save(vendor);
 
         VendorCreationResponse response = new VendorCreationResponse();
