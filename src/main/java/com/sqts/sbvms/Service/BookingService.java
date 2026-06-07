@@ -7,10 +7,7 @@ import com.sqts.sbvms.Entity.ServiceCategory;
 import com.sqts.sbvms.Entity.User;
 import com.sqts.sbvms.Entity.Vendor;
 import com.sqts.sbvms.Enum.BookingStatus;
-import com.sqts.sbvms.Exception.BookingsNotFoundException;
-import com.sqts.sbvms.Exception.InvalidTimeSlotException;
-import com.sqts.sbvms.Exception.ServiceNotFoundException;
-import com.sqts.sbvms.Exception.UserNotFoundException;
+import com.sqts.sbvms.Exception.*;
 import com.sqts.sbvms.Repository.*;
 import org.springframework.stereotype.Service;
 
@@ -36,16 +33,12 @@ public class BookingService {
         this.vendorRepository = vendorRepository;
     }
     public BookingResponse createBooking(BookingRequest request){
-        LocalTime newStartTime = request.getTimeSlot().getStartTime();
-        LocalTime newEndTime = request.getTimeSlot().getEndTime();
-
-        List<Booking> bookings = bookingRepository.findByBookingDate(request.getBookingDate());
-
-        if(!bookings.isEmpty()) {
-            bookings = bookings.stream().filter(b -> newStartTime.isBefore(b.getTimeSlot().getEndTime()) && newEndTime.isAfter(b.getTimeSlot().getStartTime())).toList();
-            if(!bookings.isEmpty())
-                throw new InvalidTimeSlotException("Please choose different timeslot.");
-        }
+        if(request == null ||
+                request.getUserId() == null ||
+                request.getServiceId() == null ||
+                request.getBookingDate() == null ||
+                request.getTimeSlot() == null)
+            throw new InvalidInputException("Please provide all the details.");
         Booking booking = new Booking();
         User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new UserNotFoundException("User not found."));
         ServiceCategory serviceCategory = serviceCategoryRepository.findById(request.getServiceId()).orElseThrow(() -> new ServiceNotFoundException("Service not found."));

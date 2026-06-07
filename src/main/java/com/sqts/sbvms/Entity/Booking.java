@@ -37,5 +37,6 @@ public class Booking {
     private BookingStatus status;
     @NotNull
     @ManyToOne
+    @JoinColumn(name = "service_category_id")
     private ServiceCategory serviceCategory;
 }
