@@ -6,6 +6,8 @@ import com.sqts.sbvms.Dto.BookingResponse;
 import com.sqts.sbvms.Service.BookingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -16,7 +18,8 @@ public class BookingController {
     public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
     }
-    public ResponseEntity<ApiResponse<BookingResponse>> createBooking(BookingRequest request){
+    @PostMapping("/bookings")
+    public ResponseEntity<ApiResponse<BookingResponse>> createBooking(@RequestBody BookingRequest request){
         return new ResponseEntity<>(
                 new ApiResponse<>(
                         true,
