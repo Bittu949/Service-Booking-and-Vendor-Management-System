@@ -208,4 +208,32 @@ public class BookingService {
         }
         return responses;
     }
+    public UpdateBookingStatusResponse updateBookingStatus(Long bookingId, UpdateBookingStatusRequest request){
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Booking not found."));
+
+        if(booking.getStatus() == BookingStatus.COMPLETED || booking.getStatus() == BookingStatus.CANCELLED)
+            throw new InvalidBookingStateException("Booking status is already "+booking.getStatus());
+
+        if(booking.getStatus() == BookingStatus.PENDING && request.getStatus() != BookingStatus.CANCELLED)
+            throw new InvalidBookingStateException("Cannot change status "+request.getStatus()+" for PENDING bookings.");
+
+        if (booking.getStatus() == BookingStatus.CONFIRMED &&
+                request.getStatus() != BookingStatus.COMPLETED &&
+                request.getStatus() != BookingStatus.CANCELLED) {
+
+            throw new InvalidBookingStateException(
+                    "Cannot change status " + request.getStatus() + " for CONFIRMED bookings.");
+        }
+
+        UpdateBookingStatusResponse response = new UpdateBookingStatusResponse();
+        response.setBookingId(booking.getId());
+        response.setPreviousStatus(booking.getStatus());
+
+        booking.setStatus(request.getStatus());
+        bookingRepository.save(booking);
+
+        response.setCurrentStatus(booking.getStatus());
+        return response;
+    }
 }

@@ -70,11 +70,23 @@ public class BookingController {
     }
     @GetMapping("/users/{id}/bookings")
     public ResponseEntity<ApiResponse<List<BookingHistoryResponse>>> getCustomerBookingHistory(@PathVariable(name = "id") Long customerId){
+        List<BookingHistoryResponse> bookingHistory = bookingService.getCustomerBookingHistory(customerId);
         return new ResponseEntity<>(
                 new ApiResponse<>(
                         true,
-                        "Booking found.",
-                        bookingService.getCustomerBookingHistory(customerId),
+                        !bookingHistory.isEmpty() ? "Bookings found." : "Bookings not found.",
+                        bookingHistory,
+                        LocalDateTime.now()),
+                HttpStatus.OK);
+    }
+    @PatchMapping("/bookings/{id}/status")
+    public ResponseEntity<ApiResponse<UpdateBookingStatusResponse>> updateBookingStatus(@RequestBody UpdateBookingStatusRequest request,
+                                                                                        @PathVariable(name = "id") Long bookingId){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Booking status updated.",
+                        bookingService.updateBookingStatus(bookingId, request),
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }
