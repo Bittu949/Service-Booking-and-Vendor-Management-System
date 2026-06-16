@@ -47,4 +47,15 @@ public class BookingController {
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }
+    @PatchMapping("/bookings/{id}/assign-vendor")
+    public ResponseEntity<ApiResponse<AssignVendorResponse>> assignVendorToBooking(@RequestBody AssignVendorRequest request,
+                                                                                   @PathVariable(name = "id") Long bookingId){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Vendor assigned to booking.",
+                        bookingService.assignVendorToBooking(request, bookingId),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
+    }
 }

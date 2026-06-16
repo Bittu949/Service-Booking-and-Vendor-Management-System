@@ -1,9 +1,6 @@
 package com.sqts.sbvms.Service;
 
-import com.sqts.sbvms.Dto.AvailableVendorResponse;
-import com.sqts.sbvms.Dto.BookingRequest;
-import com.sqts.sbvms.Dto.BookingResponse;
-import com.sqts.sbvms.Dto.PendingBookingResponse;
+import com.sqts.sbvms.Dto.*;
 import com.sqts.sbvms.Entity.*;
 import com.sqts.sbvms.Enum.BookingStatus;
 import com.sqts.sbvms.Enum.VendorStatus;
@@ -119,5 +116,54 @@ public class BookingService {
             }
         }
         return availableVendors;
+    }
+    public AssignVendorResponse assignVendorToBooking(AssignVendorRequest request,
+                                                      Long bookingId){
+        VendorService vendorService = vendorServiceRepository.findById(request.getVendorServiceId())
+                .orElseThrow(() -> new ServiceAssignmentNotFoundException("No vendor service found."));
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Booking not found."));
+
+        if(vendorService.getVendor().getStatus() != VendorStatus.ACTIVE)
+            throw new InvalidVendorStatusException("Please select active vendor.");
+
+        if(booking.getStatus() != BookingStatus.PENDING)
+            throw new InvalidBookingStateException("This booking may have been completed or already assigned to a vendor.");
+
+        LocalDate bookingDate = booking.getBookingDate();
+        LocalTime bookingStart = booking.getTimeSlot().getStartTime();
+        LocalTime bookingEnd = booking.getTimeSlot().getEndTime();
+
+        //Get all bookings of this vendor
+        List<Booking> vendorBookings =
+                bookingRepository.findByVendorServiceVendorId(vendorService.getVendor().getId());
+
+        boolean hasOverlap = vendorBookings.stream()
+                .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
+                .filter(b -> b.getBookingDate().equals(bookingDate))
+                .anyMatch(b ->
+                        bookingStart.isBefore(b.getTimeSlot().getEndTime())
+                                &&
+                                bookingEnd.isAfter(b.getTimeSlot().getStartTime())
+                );
+        if(hasOverlap){
+           throw new InvalidTimeSlotException("Vendor is not available for this time slot.");
+        }
+
+        booking.setStatus(BookingStatus.CONFIRMED);
+        booking.setVendorService(vendorService);
+        bookingRepository.save(booking);
+
+        AssignVendorResponse response = new AssignVendorResponse();
+        response.setBookingId(booking.getId());
+        response.setBookingStatus(booking.getStatus());
+        response.setBookingDate(booking.getBookingDate());
+        response.setServiceName(booking.getServiceCategory().getServiceName());
+        response.setCustomerName(booking.getUser().getName());
+        response.setVendorName(booking.getVendorService().getVendor().getUser().getName());
+        response.setStartTime(booking.getTimeSlot().getStartTime());
+        response.setEndTime(booking.getTimeSlot().getEndTime());
+
+        return response;
     }
 }
