@@ -68,4 +68,14 @@ public class BookingController {
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }
+    @GetMapping("/users/{id}/bookings")
+    public ResponseEntity<ApiResponse<List<BookingHistoryResponse>>> getCustomerBookingHistory(@PathVariable(name = "id") Long customerId){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Booking found.",
+                        bookingService.getCustomerBookingHistory(customerId),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
+    }
 }

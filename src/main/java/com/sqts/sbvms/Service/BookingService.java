@@ -19,7 +19,6 @@ public class BookingService {
     private final UserRepository userRepository;
     private final ServiceCategoryRepository serviceCategoryRepository;
     private final VendorServiceRepository vendorServiceRepository;
-    private final VendorRepository vendorRepository;
     public BookingService(BookingRepository bookingRepository,
                           UserRepository userRepository,
                           ServiceCategoryRepository serviceCategoryRepository,
@@ -183,5 +182,30 @@ public class BookingService {
         }
 
         return response;
+    }
+    public List<BookingHistoryResponse> getCustomerBookingHistory(Long customerId){
+        User customer = userRepository.findById(customerId)
+                .orElseThrow(() -> new UserNotFoundException("Customer not found."));
+
+        List<BookingHistoryResponse> responses = new ArrayList<>();
+        List<Booking> bookings = bookingRepository.findByUserId(customer.getId());
+
+        for(Booking booking : bookings){
+            BookingHistoryResponse bookingHistoryResponse = new BookingHistoryResponse();
+            bookingHistoryResponse.setBookingId(booking.getId());
+            bookingHistoryResponse.setBookingDate(booking.getBookingDate());
+            bookingHistoryResponse.setBookingStatus(booking.getStatus());
+            bookingHistoryResponse.setStartTime(booking.getTimeSlot().getStartTime());
+            bookingHistoryResponse.setEndTime(booking.getTimeSlot().getEndTime());
+            bookingHistoryResponse.setServiceName(booking.getServiceCategory().getServiceName());
+            VendorService vendorService = booking.getVendorService();
+            if(vendorService != null) {
+                Vendor vendor = vendorService.getVendor();
+                bookingHistoryResponse.setVendorId(vendor.getId());
+                bookingHistoryResponse.setVendorName(vendor.getUser().getName());
+            }
+            responses.add(bookingHistoryResponse);
+        }
+        return responses;
     }
 }
