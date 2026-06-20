@@ -1,11 +1,16 @@
 package com.sqts.sbvms.Service;
 
+import com.sqts.sbvms.Dto.LoginRequest;
 import com.sqts.sbvms.Dto.RegisterRequest;
 import com.sqts.sbvms.Entity.User;
 import com.sqts.sbvms.Enum.Role;
 import com.sqts.sbvms.Exception.InvalidInputException;
 import com.sqts.sbvms.Exception.UserAlreadyExistsException;
+import com.sqts.sbvms.Exception.UserNotFoundException;
 import com.sqts.sbvms.Repository.UserRepository;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +18,13 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder){
+    private final AuthenticationManager authenticationManager;
+    public AuthService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       AuthenticationManager authenticationManager){
         this.userRepository =  userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
     }
     public String register(RegisterRequest request){
         User user = userRepository.findByEmail(request.getEmail());
@@ -33,5 +42,11 @@ public class AuthService {
 
         userRepository.save(newUser);
         return "User registered successfully.";
+    }
+    public String login(LoginRequest request){
+        Authentication authentication = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+        authenticationManager.authenticate(authentication);
+
+        return "User logged-in successfully.";
     }
 }

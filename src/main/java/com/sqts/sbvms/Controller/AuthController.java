@@ -1,6 +1,7 @@
 package com.sqts.sbvms.Controller;
 
 import com.sqts.sbvms.Dto.ApiResponse;
+import com.sqts.sbvms.Dto.LoginRequest;
 import com.sqts.sbvms.Dto.RegisterRequest;
 import com.sqts.sbvms.Service.AuthService;
 import jakarta.validation.Valid;
@@ -27,5 +28,15 @@ public class AuthController {
                         authService.register(request),
                         LocalDateTime.now()),
                 HttpStatus.CREATED);
+    }
+    @PostMapping("/auth/login")
+    public ResponseEntity<ApiResponse<String>> login(@RequestBody @Valid LoginRequest request){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "User logged-in successfully.",
+                        authService.login(request),
+                        LocalDateTime.now()),
+                HttpStatus.OK);
     }
 }
