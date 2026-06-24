@@ -44,7 +44,10 @@ public class AuthService {
         return "User registered successfully.";
     }
     public String login(LoginRequest request){
-        Authentication authentication = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword());
         authenticationManager.authenticate(authentication);
 
         return "User logged-in successfully.";
