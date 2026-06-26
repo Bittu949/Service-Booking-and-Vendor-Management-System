@@ -1,5 +1,8 @@
 package com.sqts.sbvms.Config;
 
+import com.sqts.sbvms.Security.JwtAuthenticationFilter;
+import com.sqts.sbvms.Security.JwtService;
+import com.sqts.sbvms.Service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,5 +34,14 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
         );
         return http.build();
+    }
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(
+            JwtService jwtService,
+            CustomUserDetailsService customUserDetailsService){
+        return new JwtAuthenticationFilter(
+                jwtService,
+                customUserDetailsService
+        );
     }
 }
