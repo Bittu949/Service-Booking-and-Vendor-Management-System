@@ -37,14 +37,21 @@ public class BookingService {
     }
     public BookingResponse createBooking(BookingRequest request){
         if(request == null ||
-                request.getUserId() == null ||
                 request.getServiceId() == null ||
                 request.getBookingDate() == null ||
                 request.getTimeSlot() == null ||
                 request.getBookingAddress() == null)
             throw new InvalidInputException("Please provide all the details.");
         Booking booking = new Booking();
-        User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new UserNotFoundException("User not found."));
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() ->
+                        new UserNotFoundException("User not found."));
         ServiceCategory serviceCategory = serviceCategoryRepository.findById(request.getServiceId()).orElseThrow(() -> new ServiceNotFoundException("Service not found."));
         booking.setUser(user);
         booking.setBookingDate(request.getBookingDate());

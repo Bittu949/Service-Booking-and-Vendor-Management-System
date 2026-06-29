@@ -17,8 +17,6 @@ import java.time.LocalDate;
 @Setter
 public class BookingRequest {
     @NotNull
-    private Long userId;
-    @NotNull
     private Long serviceId;
     @NotNull
     private LocalDate bookingDate;

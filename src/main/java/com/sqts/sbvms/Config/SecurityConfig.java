@@ -75,6 +75,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/me/dashboard").hasAuthority("ROLE_VENDOR")
                         .requestMatchers(HttpMethod.GET, "/me/services").hasAuthority("ROLE_VENDOR")
                         .requestMatchers(HttpMethod.GET, "/me/services/*").hasAuthority("ROLE_VENDOR")
+                        .requestMatchers(HttpMethod.POST, "/bookings").hasAuthority("ROLE_CUSTOMER")
+
                     .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter,
