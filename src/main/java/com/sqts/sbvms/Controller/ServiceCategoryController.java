@@ -33,7 +33,7 @@ public class ServiceCategoryController {
                 HttpStatus.CREATED);
     }
     @GetMapping("/services")
-    public ResponseEntity<ApiResponse<List<ServiceCategory>>> displayServices(){
+    public ResponseEntity<ApiResponse<List<ServiceCategoryResponse>>> displayServices(){
         return new ResponseEntity<>(
                 new ApiResponse<>(
                         true,

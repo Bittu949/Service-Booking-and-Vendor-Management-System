@@ -50,11 +50,23 @@ public class ServiceCategoryService {
 
         return response;
     }
-    public List<ServiceCategory> displayServices(){
+    public List<ServiceCategoryResponse> displayServices() {
         List<ServiceCategory> services = serviceCategoryRepository.findAll();
-        if(services.isEmpty())
+        if (services.isEmpty())
             throw new NoServiceFoundException("No service found.");
-        return services;
+        List<ServiceCategoryResponse> responses = new ArrayList<>();
+        for (ServiceCategory service : services) {
+
+            ServiceCategoryResponse response = new ServiceCategoryResponse();
+
+            response.setId(service.getId());
+            response.setServiceName(service.getServiceName());
+            response.setDescription(service.getDescription());
+
+            responses.add(response);
+        }
+
+        return responses;
     }
     public ServiceCategory updateService(Long id, ServiceCategory updatedService){
         Optional<ServiceCategory> serviceOpt = serviceCategoryRepository.findById(id);
