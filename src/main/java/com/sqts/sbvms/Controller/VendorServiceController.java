@@ -247,4 +247,17 @@ public class VendorServiceController {
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<VendorProfileResponse>> getMyProfile() {
+
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Profile found.",
+                        vendorServiceService.getMyProfile(),
+                        LocalDateTime.now()
+                ),
+                HttpStatus.OK
+        );
+    }
 }

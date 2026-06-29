@@ -12,7 +12,11 @@ import com.sqts.sbvms.Repository.ServiceCategoryRepository;
 import com.sqts.sbvms.Repository.UserRepository;
 import com.sqts.sbvms.Repository.VendorRepository;
 import com.sqts.sbvms.Repository.VendorServiceRepository;
+import com.sqts.sbvms.Security.CustomUserDetails;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -272,8 +276,13 @@ public class VendorServiceService {
                 .orElseThrow(() -> new VendorNotFoundException("Vendor not found."));
         if(request.getVendorName() != null)
             vendor.getUser().setName(request.getVendorName());
-        if(request.getVendorEmail() != null)
-            vendor.getUser().setEmail(request.getVendorEmail());
+        if (request.getVendorEmail() != null) {
+            String email = request.getVendorEmail().trim();
+            if (!email.equalsIgnoreCase(vendor.getUser().getEmail())
+                    && userRepository.existsByEmail(email))
+                throw new UserAlreadyExistsException("Email already registered.");
+            vendor.getUser().setEmail(email);
+        }
         if(request.getPassword() != null) {
             if (request.getPassword().trim().length() < 8)
                 throw new WeakPasswordException("Provided password is weak.");
@@ -433,5 +442,28 @@ public class VendorServiceService {
         }
         return responses;
     }
+    public VendorProfileResponse getMyProfile() {
 
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        Vendor vendor = vendorRepository.findByUserId(userDetails.getId())
+                .orElseThrow(() ->
+                        new VendorNotFoundException("Vendor not found."));
+
+        VendorProfileResponse response = new VendorProfileResponse();
+
+        response.setVendorId(vendor.getId());
+        response.setName(vendor.getUser().getName());
+        response.setEmail(vendor.getUser().getEmail());
+        response.setPhoneNumber(vendor.getPhoneNumber());
+        response.setVendorAddress(vendor.getVendorAddress());
+        response.setExperienceYears(vendor.getExperienceYears());
+        response.setDescription(vendor.getDescription());
+        response.setStatus(vendor.getStatus());
+
+        return response;
+    }
 }
