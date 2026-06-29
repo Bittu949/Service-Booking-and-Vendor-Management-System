@@ -35,9 +35,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/auth/register", "/auth/login", "/vendor/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/services").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_VENDOR", "ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/services/*")
-                        .hasAnyAuthority("ROLE_CUSTOMER", "ROLE_VENDOR", "ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/services/**/vendors").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/services/*").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_VENDOR", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/services/*/vendors").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/services").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/services/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/services/**").hasAuthority("ROLE_ADMIN")
