@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface ServiceCategoryRepository extends JpaRepository<ServiceCategory, Long> {
     Optional<ServiceCategory> findByServiceNameIgnoreCase(String serviceName);
+    boolean existsByServiceNameIgnoreCase(String serviceName);
 }

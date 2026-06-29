@@ -244,4 +244,14 @@ public class GlobalExceptionHandler {
                         LocalDateTime.now()),
                 HttpStatus.FORBIDDEN);
     }
+    @ExceptionHandler(DuplicateServiceException.class)
+    public ResponseEntity<ApiResponse<Object>> handleDuplicateServiceException(DuplicateServiceException ex){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()),
+                HttpStatus.BAD_REQUEST);
+    }
 }

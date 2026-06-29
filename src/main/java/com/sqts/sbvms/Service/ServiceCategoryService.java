@@ -1,8 +1,11 @@
 package com.sqts.sbvms.Service;
 
+import com.sqts.sbvms.Dto.ServiceCategoryRequest;
+import com.sqts.sbvms.Dto.ServiceCategoryResponse;
 import com.sqts.sbvms.Dto.VendorByServiceResponse;
 import com.sqts.sbvms.Entity.ServiceCategory;
 import com.sqts.sbvms.Entity.VendorService;
+import com.sqts.sbvms.Enum.VendorStatus;
 import com.sqts.sbvms.Exception.*;
 import com.sqts.sbvms.Repository.ServiceCategoryRepository;
 import com.sqts.sbvms.Repository.VendorServiceRepository;
@@ -24,10 +27,28 @@ public class ServiceCategoryService {
         this.serviceCategoryRepository = serviceCategoryRepository;
         this.vendorServiceRepository = vendorServiceRepository;
     }
-    public ServiceCategory createService(ServiceCategory service){
-        if(service==null)
+    public ServiceCategoryResponse createService(ServiceCategoryRequest request){
+
+        if(request == null)
             throw new InvalidInputException("Please fill all the fields.");
-        return serviceCategoryRepository.save(service);
+
+        String serviceName = request.getServiceName().trim();
+
+        if(serviceCategoryRepository.existsByServiceNameIgnoreCase(serviceName))
+            throw new DuplicateServiceException("Service already exists.");
+
+        ServiceCategory service = new ServiceCategory();
+        service.setServiceName(serviceName);
+        service.setDescription(request.getDescription().trim());
+
+        serviceCategoryRepository.save(service);
+
+        ServiceCategoryResponse response = new ServiceCategoryResponse();
+        response.setId(service.getId());
+        response.setServiceName(service.getServiceName());
+        response.setDescription(service.getDescription());
+
+        return response;
     }
     public List<ServiceCategory> displayServices(){
         List<ServiceCategory> services = serviceCategoryRepository.findAll();
@@ -80,14 +101,16 @@ public class ServiceCategoryService {
 
         List<VendorByServiceResponse> vendorByServiceResponses = new ArrayList<>();
         for(VendorService vendorService : vendorServices){
-            VendorByServiceResponse response = new VendorByServiceResponse();
-            response.setVendorId(vendorService.getVendor().getId());
-            response.setVendorName(vendorService.getVendor().getUser().getName());
-            response.setVendorEmail(vendorService.getVendor().getUser().getEmail());
-            response.setPrice(vendorService.getPrice());
-            response.setDuration(vendorService.getDuration());
-            response.setVendorAddress(vendorService.getVendor().getVendorAddress());
-            vendorByServiceResponses.add(response);
+            if(vendorService.getVendor().getStatus() == VendorStatus.ACTIVE) {
+                VendorByServiceResponse response = new VendorByServiceResponse();
+                response.setVendorId(vendorService.getVendor().getId());
+                response.setVendorName(vendorService.getVendor().getUser().getName());
+                response.setVendorEmail(vendorService.getVendor().getUser().getEmail());
+                response.setPrice(vendorService.getPrice());
+                response.setDuration(vendorService.getDuration());
+                response.setVendorAddress(vendorService.getVendor().getVendorAddress());
+                vendorByServiceResponses.add(response);
+            }
         }
         return vendorByServiceResponses;
     }

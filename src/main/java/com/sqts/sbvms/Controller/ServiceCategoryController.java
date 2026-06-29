@@ -1,6 +1,8 @@
 package com.sqts.sbvms.Controller;
 
 import com.sqts.sbvms.Dto.ApiResponse;
+import com.sqts.sbvms.Dto.ServiceCategoryRequest;
+import com.sqts.sbvms.Dto.ServiceCategoryResponse;
 import com.sqts.sbvms.Dto.VendorByServiceResponse;
 import com.sqts.sbvms.Entity.ServiceCategory;
 import com.sqts.sbvms.Service.ServiceCategoryService;
@@ -19,12 +21,14 @@ public class ServiceCategoryController {
         this.serviceCategoryService = serviceCategoryService;
     }
     @PostMapping("/services")
-    public ResponseEntity<ApiResponse<ServiceCategory>> createService(@Valid @RequestBody ServiceCategory service){
+    public ResponseEntity<ApiResponse<ServiceCategoryResponse>> createService(
+            @Valid @RequestBody ServiceCategoryRequest request) {
+
         return new ResponseEntity<>(
                 new ApiResponse<>(
                         true,
                         "Service created.",
-                        serviceCategoryService.createService(service),
+                        serviceCategoryService.createService(request),
                         LocalDateTime.now()),
                 HttpStatus.CREATED);
     }
