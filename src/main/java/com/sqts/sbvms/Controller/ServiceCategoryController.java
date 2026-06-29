@@ -1,9 +1,6 @@
 package com.sqts.sbvms.Controller;
 
-import com.sqts.sbvms.Dto.ApiResponse;
-import com.sqts.sbvms.Dto.ServiceCategoryRequest;
-import com.sqts.sbvms.Dto.ServiceCategoryResponse;
-import com.sqts.sbvms.Dto.VendorByServiceResponse;
+import com.sqts.sbvms.Dto.*;
 import com.sqts.sbvms.Entity.ServiceCategory;
 import com.sqts.sbvms.Service.ServiceCategoryService;
 import jakarta.validation.Valid;
@@ -43,13 +40,14 @@ public class ServiceCategoryController {
                 HttpStatus.OK);
     }
     @PatchMapping("/services/{id}")
-    public ResponseEntity<ApiResponse<ServiceCategory>> updateService(@PathVariable Long id,
-                                                                      @Valid @RequestBody ServiceCategory updatedService){
+    public ResponseEntity<ApiResponse<ServiceCategoryResponse>> updateService(
+            @PathVariable Long id,
+            @RequestBody ServiceCategoryUpdateRequest request) {
         return new ResponseEntity<>(
                 new ApiResponse<>(
                         true,
                         "Service updated.",
-                        serviceCategoryService.updateService(id, updatedService),
+                        serviceCategoryService.updateService(id, request),
                         LocalDateTime.now()),
                 HttpStatus.OK);
     }

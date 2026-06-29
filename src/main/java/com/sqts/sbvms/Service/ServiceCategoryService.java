@@ -2,6 +2,7 @@ package com.sqts.sbvms.Service;
 
 import com.sqts.sbvms.Dto.ServiceCategoryRequest;
 import com.sqts.sbvms.Dto.ServiceCategoryResponse;
+import com.sqts.sbvms.Dto.ServiceCategoryUpdateRequest;
 import com.sqts.sbvms.Dto.VendorByServiceResponse;
 import com.sqts.sbvms.Entity.ServiceCategory;
 import com.sqts.sbvms.Entity.VendorService;
@@ -68,17 +69,40 @@ public class ServiceCategoryService {
 
         return responses;
     }
-    public ServiceCategory updateService(Long id, ServiceCategory updatedService){
-        Optional<ServiceCategory> serviceOpt = serviceCategoryRepository.findById(id);
-        if(serviceOpt.isEmpty())
-            throw new NoServiceFoundException("No service found");
-        ServiceCategory service = serviceOpt.get();
-        if(updatedService.getServiceName()!=null && !updatedService.getServiceName().isEmpty())
-            service.setServiceName(updatedService.getServiceName());
-        if(updatedService.getDescription()!=null && !updatedService.getDescription().isEmpty())
-            service.setDescription(updatedService.getDescription());
+    public ServiceCategoryResponse updateService(
+            Long id,
+            ServiceCategoryUpdateRequest request){
+
+        ServiceCategory service = serviceCategoryRepository.findById(id)
+                .orElseThrow(() ->
+                        new NoServiceFoundException("Service not found."));
+
+        if(request == null)
+            throw new InvalidInputException("Please fill all the fields.");
+
+        if(request.getServiceName() != null){
+
+            String serviceName = request.getServiceName().trim();
+
+            if(!serviceName.equalsIgnoreCase(service.getServiceName())
+                    && serviceCategoryRepository.existsByServiceNameIgnoreCase(serviceName))
+                throw new DuplicateServiceException("Service already exists.");
+
+            service.setServiceName(serviceName);
+        }
+
+        if(request.getDescription() != null)
+            service.setDescription(request.getDescription().trim());
+
         serviceCategoryRepository.save(service);
-        return service;
+
+        ServiceCategoryResponse response = new ServiceCategoryResponse();
+
+        response.setId(service.getId());
+        response.setServiceName(service.getServiceName());
+        response.setDescription(service.getDescription());
+
+        return response;
     }
     public ServiceCategory deleteService(Long serviceId){
         ServiceCategory serviceCategory = serviceCategoryRepository.findById(serviceId)
