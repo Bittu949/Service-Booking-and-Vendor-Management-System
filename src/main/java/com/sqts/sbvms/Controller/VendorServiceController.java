@@ -300,4 +300,18 @@ public class VendorServiceController {
                 HttpStatus.OK
         );
     }
+    @GetMapping("/me/services/{serviceId}")
+    public ResponseEntity<ApiResponse<SearchResponse>> getMyService(
+            @PathVariable Long serviceId){
+
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Data found.",
+                        vendorServiceService.getMyService(serviceId),
+                        LocalDateTime.now()
+                ),
+                HttpStatus.OK
+        );
+    }
 }

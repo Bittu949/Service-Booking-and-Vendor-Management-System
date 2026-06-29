@@ -588,4 +588,41 @@ public class VendorServiceService {
 
         return response;
     }
+    public SearchResponse getMyService(Long serviceId){
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        Vendor vendor = vendorRepository.findByUserId(userDetails.getId())
+                .orElseThrow(() ->
+                        new VendorNotFoundException("Vendor not found."));
+
+        ServiceCategory serviceCategory = serviceCategoryRepository.findById(serviceId)
+                .orElseThrow(() ->
+                        new ServiceNotFoundException("Service not found."));
+
+        VendorService vendorService =
+                vendorServiceRepository.findByVendor_idAndServiceCategory_id(
+                        vendor.getId(),
+                        serviceCategory.getId());
+
+        if(vendorService == null)
+            throw new ServiceAssignmentNotFoundException(
+                    "Service assignment not found.");
+
+        SearchResponse response = new SearchResponse();
+
+        response.setVendorId(vendor.getId());
+        response.setVendorName(vendor.getUser().getName());
+        response.setVendorEmail(vendor.getUser().getEmail());
+        response.setServiceName(serviceCategory.getServiceName());
+        response.setPrice(vendorService.getPrice());
+        response.setDuration(vendorService.getDuration());
+        response.setVendorAddress(vendor.getVendorAddress());
+
+        return response;
+    }
 }
