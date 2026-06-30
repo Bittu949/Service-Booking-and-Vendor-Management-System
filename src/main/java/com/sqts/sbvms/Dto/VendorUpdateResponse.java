@@ -31,12 +31,6 @@ public class VendorUpdateResponse {
     )
     private String vendorName;
 
-    @Schema(
-            description = "Updated email address of the vendor.",
-            example = "rahul@gmail.com"
-    )
-    private String vendorEmail;
-
     @Valid
     @Schema(
             description = "Updated business address of the vendor."

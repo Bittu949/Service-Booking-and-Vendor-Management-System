@@ -31,15 +31,6 @@ public class VendorUpdateRequest {
     private String vendorName;
 
     @Schema(
-            description = "Updated email address of the vendor.",
-            example = "rahul@gmail.com",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    @NotBlank
-    @Email
-    private String vendorEmail;
-
-    @Schema(
             description = "Updated account password.",
             example = "Rahul@123",
             requiredMode = Schema.RequiredMode.REQUIRED

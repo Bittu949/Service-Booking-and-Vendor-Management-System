@@ -4,12 +4,14 @@ import com.sqts.sbvms.Entity.User;
 import com.sqts.sbvms.Exception.UserNotFoundException;
 import com.sqts.sbvms.Repository.UserRepository;
 import com.sqts.sbvms.Security.CustomUserDetails;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
     public CustomUserDetailsService(UserRepository userRepository) {

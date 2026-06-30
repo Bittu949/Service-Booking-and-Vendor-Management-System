@@ -10,6 +10,7 @@ import com.sqts.sbvms.Enum.VendorStatus;
 import com.sqts.sbvms.Exception.*;
 import com.sqts.sbvms.Repository.ServiceCategoryRepository;
 import com.sqts.sbvms.Repository.VendorServiceRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
+@Transactional
 public class ServiceCategoryService {
     private final ServiceCategoryRepository serviceCategoryRepository;
     private final VendorServiceRepository vendorServiceRepository;

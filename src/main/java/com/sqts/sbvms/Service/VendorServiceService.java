@@ -231,35 +231,26 @@ public class VendorServiceService {
     public VendorUpdateResponse updateVendor(Long vendorId, VendorUpdateRequest request){
         Vendor vendor = vendorRepository.findById(vendorId)
                 .orElseThrow(() -> new VendorNotFoundException("Vendor not found."));
-        if(request.getVendorName() != null)
-            vendor.getUser().setName(request.getVendorName());
-        if (request.getVendorEmail() != null) {
-            String email = request.getVendorEmail().trim();
-            if (!email.equalsIgnoreCase(vendor.getUser().getEmail())
-                    && userRepository.existsByEmail(email))
-                throw new UserAlreadyExistsException("Email already registered.");
-            vendor.getUser().setEmail(email);
+
+        vendor.getUser().setName(request.getVendorName().trim());
+
+        if (request.getPassword().trim().length() < 8)
+            throw new WeakPasswordException("Provided password is weak.");
+        vendor.getUser().setPassword(passwordEncoder.encode(request.getPassword().trim()));
+
+        vendor.setVendorAddress(request.getVendorAddress());
+
+        String phone = request.getPhoneNumber().trim();
+        if (!phone.equals(vendor.getPhoneNumber())
+                && vendorRepository.existsByPhoneNumber(phone)) {
+            throw new VendorAlreadyExistsException("Phone number already registered.");
         }
-        if(request.getPassword() != null) {
-            if (request.getPassword().trim().length() < 8)
-                throw new WeakPasswordException("Provided password is weak.");
-            vendor.getUser().setPassword(passwordEncoder.encode(request.getPassword().trim()));
-        }
-        if(request.getVendorAddress() != null)
-            vendor.setVendorAddress(request.getVendorAddress());
-        if (request.getPhoneNumber() != null) {
-            String phone = request.getPhoneNumber().trim();
-            if (!phone.equals(vendor.getPhoneNumber())
-                    && vendorRepository.existsByPhoneNumber(phone)) {
-                throw new VendorAlreadyExistsException("Phone number already registered.");
-            }
-            vendor.setPhoneNumber(phone);
-        }
+        vendor.setPhoneNumber(phone);
+
         vendorRepository.save(vendor);
         VendorUpdateResponse response = new VendorUpdateResponse();
         response.setVendorId(vendor.getId());
         response.setVendorName(vendor.getUser().getName());
-        response.setVendorEmail(vendor.getUser().getEmail());
         response.setVendorAddress(vendor.getVendorAddress());
         response.setPhoneNumber(vendor.getPhoneNumber());
         return response;
@@ -465,43 +456,22 @@ public class VendorServiceService {
                 .orElseThrow(() ->
                         new VendorNotFoundException("Vendor not found."));
 
-        if(request.getVendorName() != null)
-            vendor.getUser().setName(request.getVendorName().trim());
+        vendor.getUser().setName(request.getVendorName().trim());
 
-        if(request.getVendorEmail() != null){
+        if(request.getPassword().trim().length() < 8)
+            throw new WeakPasswordException("Provided password is weak.");
+        vendor.getUser().setPassword(
+                passwordEncoder.encode(request.getPassword().trim()));
 
-            String email = request.getVendorEmail().trim();
+        vendor.setVendorAddress(request.getVendorAddress());
 
-            if(!email.equalsIgnoreCase(vendor.getUser().getEmail())
-                    && userRepository.existsByEmail(email))
-                throw new UserAlreadyExistsException("Email already registered.");
+        String phone = request.getPhoneNumber().trim();
+        if(!phone.equals(vendor.getPhoneNumber())
+                && vendorRepository.existsByPhoneNumber(phone))
+            throw new VendorAlreadyExistsException(
+                    "Phone number already registered.");
 
-            vendor.getUser().setEmail(email);
-        }
-
-        if(request.getPassword() != null){
-
-            if(request.getPassword().trim().length() < 8)
-                throw new WeakPasswordException("Provided password is weak.");
-
-            vendor.getUser().setPassword(
-                    passwordEncoder.encode(request.getPassword().trim()));
-        }
-
-        if(request.getVendorAddress() != null)
-            vendor.setVendorAddress(request.getVendorAddress());
-
-        if(request.getPhoneNumber() != null){
-
-            String phone = request.getPhoneNumber().trim();
-
-            if(!phone.equals(vendor.getPhoneNumber())
-                    && vendorRepository.existsByPhoneNumber(phone))
-                throw new VendorAlreadyExistsException(
-                        "Phone number already registered.");
-
-            vendor.setPhoneNumber(phone);
-        }
+        vendor.setPhoneNumber(phone);
 
         vendorRepository.save(vendor);
 
@@ -509,7 +479,6 @@ public class VendorServiceService {
 
         response.setVendorId(vendor.getId());
         response.setVendorName(vendor.getUser().getName());
-        response.setVendorEmail(vendor.getUser().getEmail());
         response.setVendorAddress(vendor.getVendorAddress());
         response.setPhoneNumber(vendor.getPhoneNumber());
 
