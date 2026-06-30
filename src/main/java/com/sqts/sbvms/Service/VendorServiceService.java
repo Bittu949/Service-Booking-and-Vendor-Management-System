@@ -145,6 +145,7 @@ public class VendorServiceService {
             vendorServiceDetailsList.add(vendorServiceDetails);
         }
         displayVendorDetails.setVendorServiceDetails(vendorServiceDetailsList);
+        displayVendorDetails.setVendorStatus(vendor.getStatus());
         displayVendorDetails.setVendorAddress(vendor.getVendorAddress());
         return displayVendorDetails;
     }
@@ -265,10 +266,17 @@ public class VendorServiceService {
         return response;
     }
     public void removeAssignedServiceFromVendor(Long vendorId, Long serviceId){
-        Vendor vendor = vendorRepository.findById(vendorId).orElseThrow(() -> new VendorNotFoundException("Vendor not found."));
-        ServiceCategory serviceCategory = serviceCategoryRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException("Service not found."));
+        vendorRepository.findById(vendorId).orElseThrow(() -> new VendorNotFoundException("Vendor not found."));
+        serviceCategoryRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException("Service not found."));
 
-        vendorServiceRepository.removeByVendor_idAndServiceCategory_id(vendorId, serviceId);
+        VendorService vendorService = vendorServiceRepository
+                .findByVendor_idAndServiceCategory_id(vendorId, serviceId);
+
+        if(vendorService == null)
+            throw new VendorServiceNotFoundException(
+                    "Vendor is not assigned this service.");
+
+        vendorServiceRepository.delete(vendorService);
     }
     public ServiceUpdationResponse updateAssignedServiceDetails(Long vendorId, Long serviceId, ServiceUpdationRequest request){
         if(request==null)

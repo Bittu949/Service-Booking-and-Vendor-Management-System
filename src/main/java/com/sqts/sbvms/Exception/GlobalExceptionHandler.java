@@ -274,4 +274,14 @@ public class GlobalExceptionHandler {
                         LocalDateTime.now()),
                 HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(VendorServiceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleVendorServiceNotFoundException(VendorServiceNotFoundException ex){
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()),
+                HttpStatus.BAD_REQUEST);
+    }
 }
