@@ -55,6 +55,30 @@ public class VendorServiceService {
 
         for (Vendor vendor : vendors) {
 
+            VendorService vendorService = vendorServiceRepository
+                    .findByVendor_Id(vendor.getId())
+                    .orElseThrow(() ->
+                            new VendorServiceNotFoundException(
+                                    "Vendor service not found."));
+
+            PendingVendorServiceResponse serviceResponse =
+                    new PendingVendorServiceResponse();
+
+            Duration duration = vendorService.getDuration();
+
+            serviceResponse.setServiceName(
+                    vendorService.getServiceCategory().getServiceName());
+
+            serviceResponse.setPrice(vendorService.getPrice());
+
+            serviceResponse.setEstimatedDuration(
+                    String.format(
+                            "%02d:%02d",
+                            duration.toHours(),
+                            duration.toMinutesPart()
+                    )
+            );
+
             PendingVendorResponse response = new PendingVendorResponse();
 
             response.setVendorId(vendor.getId());
@@ -65,57 +89,17 @@ public class VendorServiceService {
             response.setDescription(vendor.getDescription());
             response.setVendorAddress(vendor.getVendorAddress());
             response.setStatus(vendor.getStatus());
+            response.setService(serviceResponse);
 
             responses.add(response);
         }
 
         return responses;
     }
-    public ServiceAssignmentResponse assignServiceToVendor(ServiceAssignmentRequest request) {
-        if(request == null)
-            throw new InvalidInputException("Please fill all the fields.");
-
-        Duration duration = request.getDuration();
-
-        if (duration.isNegative() || duration.isZero()) {
-            throw new InvalidDurationException(
-                    "Duration must be greater than zero.");
-        }
-
-        Vendor vendor = vendorRepository.findById(request.getVendorId())
-                .orElseThrow(() ->
-                        new VendorNotFoundException("Vendor not found."));
-
-        if(vendor.getStatus() != VendorStatus.ACTIVE)
-            throw new InvalidVendorStatusException("Only active vendors can be assigned services.");
-
-        ServiceCategory serviceCategory = serviceCategoryRepository.findById(request.getServiceCategoryId())
-                .orElseThrow(() ->
-                        new ServiceNotFoundException("Service not found."));
-
-        if(vendorServiceRepository.existsByVendorIdAndServiceCategoryId(request.getVendorId(), request.getServiceCategoryId()))
-            throw new DuplicateServiceAssignmentException("Provided service already mapped to this vendor.");
-
-        VendorService vendorService = new VendorService();
-        vendorService.setVendor(vendor);
-        vendorService.setServiceCategory(serviceCategory);
-        vendorService.setPrice(request.getPrice());
-        vendorService.setDuration(request.getDuration());
-        vendorServiceRepository.save(vendorService);
-
-        ServiceAssignmentResponse response = new ServiceAssignmentResponse();
-        response.setVendorId(vendor.getId());
-        response.setServiceCategoryName(serviceCategory.getServiceName());
-        response.setPrice(request.getPrice());
-        response.setDuration(request.getDuration());
-        return response;
-    }
     public List<DisplayVendorDetails> displayAllVendors(){
         List<DisplayVendorDetails> vendorDetailsList = new ArrayList<>();
-        List<Vendor> vendorList = vendorRepository.findAll();
-        vendorList = vendorList.stream()
-                .filter(v -> v.getStatus() == VendorStatus.ACTIVE)
-                .toList();
+        List<Vendor> vendorList =
+                vendorRepository.findByStatus(VendorStatus.ACTIVE);
         if (vendorList.isEmpty())
             throw new NoVendorFoundException("No vendor found.");
         for(Vendor vendor : vendorList) {
@@ -188,6 +172,30 @@ public class VendorServiceService {
                 .orElseThrow(() ->
                         new VendorNotFoundException("Vendor not found."));
 
+        VendorService vendorService = vendorServiceRepository
+                .findByVendor_Id(vendorId)
+                .orElseThrow(() ->
+                        new VendorServiceNotFoundException(
+                                "Vendor service not found."));
+
+        PendingVendorServiceResponse serviceResponse =
+                new PendingVendorServiceResponse();
+
+        Duration duration = vendorService.getDuration();
+
+        serviceResponse.setServiceName(
+                vendorService.getServiceCategory().getServiceName());
+
+        serviceResponse.setPrice(vendorService.getPrice());
+
+        serviceResponse.setEstimatedDuration(
+                String.format(
+                        "%02d:%02d",
+                        duration.toHours(),
+                        duration.toMinutesPart()
+                )
+        );
+
         VendorVerificationResponse response =
                 new VendorVerificationResponse();
 
@@ -206,6 +214,8 @@ public class VendorServiceService {
 
         response.setStatus(vendor.getStatus());
 
+        response.setService(serviceResponse);
+
         return response;
     }
     public void approveVendor(Long vendorId){
@@ -222,19 +232,21 @@ public class VendorServiceService {
 
         vendorRepository.save(vendor);
     }
-    public void rejectVendor(Long vendorId){
+    public void rejectVendor(Long vendorId) {
 
         Vendor vendor = vendorRepository.findById(vendorId)
                 .orElseThrow(() ->
                         new VendorNotFoundException("Vendor not found."));
 
-        if(vendor.getStatus() != VendorStatus.PENDING_APPROVAL)
+        if (vendor.getStatus() != VendorStatus.PENDING_APPROVAL)
             throw new InvalidVendorStatusException(
                     "Only pending vendors can be rejected.");
 
-        vendor.setStatus(VendorStatus.REJECTED);
+        vendorServiceRepository.deleteAllByVendor_Id(vendorId);
 
-        vendorRepository.save(vendor);
+        vendorRepository.delete(vendor);
+
+        userRepository.delete(vendor.getUser());
     }
     public VendorUpdateResponse updateVendor(Long vendorId, VendorUpdateRequest request){
         Vendor vendor = vendorRepository.findById(vendorId)
@@ -367,73 +379,7 @@ public class VendorServiceService {
         return response;
     }
     public Long countTotalVendors(){
-        return vendorRepository.count();
-    }
-    public List<ServiceAssignmentResponse> bulkServiceAssignment(
-            Long vendorId,
-            List<BulkServiceAssignmentRequest> requests) {
-
-        Vendor vendor = vendorRepository.findById(vendorId)
-                .orElseThrow(() ->
-                        new VendorNotFoundException("Vendor not found."));
-
-        if (vendor.getStatus() != VendorStatus.ACTIVE)
-            throw new InvalidVendorStatusException("Vendor is not active.");
-
-        List<ServiceCategory> serviceCategories = new ArrayList<>();
-
-        for (BulkServiceAssignmentRequest request : requests) {
-
-            ServiceCategory serviceCategory = serviceCategoryRepository
-                    .findById(request.getServiceCategoryId())
-                    .orElseThrow(() ->
-                            new ServiceNotFoundException("Service not found."));
-
-            if (vendorServiceRepository.existsByVendorIdAndServiceCategoryId(
-                    vendorId,
-                    serviceCategory.getId())) {
-
-                throw new DuplicateServiceAssignmentException(
-                        "Service '" + serviceCategory.getServiceName()
-                                + "' is already assigned to this vendor.");
-            }
-
-            if (serviceCategories.stream()
-                    .anyMatch(service -> service.getId().equals(serviceCategory.getId()))) {
-
-                throw new DuplicateServiceAssignmentException(
-                        "Duplicate service '" + serviceCategory.getServiceName()
-                                + "' found in the request.");
-            }
-
-            serviceCategories.add(serviceCategory);
-        }
-
-        List<ServiceAssignmentResponse> responses = new ArrayList<>();
-
-        for (int i = 0; i < requests.size(); i++) {
-
-            BulkServiceAssignmentRequest request = requests.get(i);
-            ServiceCategory serviceCategory = serviceCategories.get(i);
-
-            VendorService vendorService = new VendorService();
-            vendorService.setVendor(vendor);
-            vendorService.setServiceCategory(serviceCategory);
-            vendorService.setPrice(request.getPrice());
-            vendorService.setDuration(request.getDuration());
-
-            vendorServiceRepository.save(vendorService);
-
-            ServiceAssignmentResponse response = new ServiceAssignmentResponse();
-            response.setVendorId(vendor.getId());
-            response.setServiceCategoryName(serviceCategory.getServiceName());
-            response.setPrice(request.getPrice());
-            response.setDuration(request.getDuration());
-
-            responses.add(response);
-        }
-
-        return responses;
+        return vendorRepository.countByStatus(VendorStatus.ACTIVE);
     }
     public VendorProfileResponse getMyProfile() {
 

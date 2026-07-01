@@ -13,6 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Schema(
         name = "VendorRegistrationRequest",
         description = "Request payload for registering a new vendor account. Newly registered vendors remain pending until approved by an administrator."
@@ -63,6 +65,14 @@ public class VendorRegistrationRequest {
     )
     @NotBlank
     private String phoneNumber;
+
+    @Schema(
+            description = "Service offered by the vendor along with pricing and estimated duration.",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    @Valid
+    @NotNull
+    private VendorServiceRegistrationRequest service;
 
     @Schema(
             description = "Total years of professional experience.",

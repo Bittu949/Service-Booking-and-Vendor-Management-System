@@ -142,25 +142,6 @@ public class VendorServiceController {
         );
     }
     @Operation(
-            summary = "Assign Service to Vendor",
-            description = "Assigns a service category to a vendor along with the service price and estimated completion duration."
-    )
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Service assigned successfully."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request or service already assigned."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Vendor or service category not found.")
-    })
-    @PostMapping("/vendor/assignService")
-    public ResponseEntity<ApiResponse<ServiceAssignmentResponse>> assignServiceToVendor(@Valid @RequestBody ServiceAssignmentRequest request){
-        return new ResponseEntity<>(
-                new ApiResponse<>(
-                        true,
-                        "Service assigned to vendor successfully.",
-                        vendorServiceService.assignServiceToVendor(request),
-                        LocalDateTime.now()),
-                HttpStatus.CREATED);
-    }
-    @Operation(
             summary = "Get All Vendors",
             description = "Retrieves all vendors registered in the system along with their profile details."
     )
@@ -438,32 +419,6 @@ public class VendorServiceController {
                         vendorServiceService.countTotalVendors(),
                         LocalDateTime.now()),
                 HttpStatus.OK);
-    }
-    @Operation(
-            summary = "Assign Multiple Services",
-            description = "Assigns multiple service categories to a vendor in a single request."
-    )
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Services assigned successfully."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Vendor or service category not found.")
-    })
-    @PostMapping("/vendor/{id}/services/bulk")
-    public ResponseEntity<ApiResponse<List<ServiceAssignmentResponse>>> bulkServiceAssignment(
-            @Parameter(
-                    description = "Vendor ID",
-                    required = true,
-                    example = "1"
-            )
-            @PathVariable("id") Long vendorId,
-            @Valid @RequestBody List<BulkServiceAssignmentRequest> request){
-        return new ResponseEntity<>(
-                new ApiResponse<>(
-                        true,
-                        "Services assigned successfully.",
-                        vendorServiceService.bulkServiceAssignment(vendorId, request),
-                        LocalDateTime.now()),
-                HttpStatus.CREATED);
     }
     @Operation(
             summary = "Get My Profile",

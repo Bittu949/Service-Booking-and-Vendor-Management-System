@@ -6,6 +6,7 @@ import com.sqts.sbvms.Entity.VendorService;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface VendorServiceRepository extends JpaRepository<VendorService, Long> {
     List<VendorService> findByVendorId(Long id);
@@ -16,4 +17,6 @@ public interface VendorServiceRepository extends JpaRepository<VendorService, Lo
     Long countByVendor_id(Long vendorId);
     List<VendorService> findByServiceCategoryId(Long serviceId);
     boolean existsByServiceCategoryId(Long serviceCategoryId);
+    void deleteAllByVendor_Id(Long vendorId);
+    Optional<VendorService> findByVendor_Id(Long vendorId);
 }

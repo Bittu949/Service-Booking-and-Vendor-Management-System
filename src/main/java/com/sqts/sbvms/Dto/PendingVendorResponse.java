@@ -61,6 +61,12 @@ public class PendingVendorResponse {
     )
     private Address vendorAddress;
 
+    @Valid
+    @Schema(
+            description = "Service requested by the vendor."
+    )
+    private PendingVendorServiceResponse service;
+
     @Schema(
             description = "Current approval status of the vendor.",
             example = "PENDING"

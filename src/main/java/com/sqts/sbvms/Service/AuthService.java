@@ -4,13 +4,17 @@ import com.sqts.sbvms.Dto.LoginRequest;
 import com.sqts.sbvms.Dto.RegisterRequest;
 import com.sqts.sbvms.Dto.VendorRegistrationRequest;
 import com.sqts.sbvms.Dto.VendorRegistrationResponse;
+import com.sqts.sbvms.Entity.ServiceCategory;
 import com.sqts.sbvms.Entity.User;
 import com.sqts.sbvms.Entity.Vendor;
+import com.sqts.sbvms.Entity.VendorService;
 import com.sqts.sbvms.Enum.Role;
 import com.sqts.sbvms.Enum.VendorStatus;
 import com.sqts.sbvms.Exception.*;
+import com.sqts.sbvms.Repository.ServiceCategoryRepository;
 import com.sqts.sbvms.Repository.UserRepository;
 import com.sqts.sbvms.Repository.VendorRepository;
+import com.sqts.sbvms.Repository.VendorServiceRepository;
 import com.sqts.sbvms.Security.JwtService;
 import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,24 +25,34 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
+
 @Service
 @Transactional
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final ServiceCategoryRepository serviceCategoryRepository;
+    private final VendorServiceRepository vendorServiceRepository;
     private final JwtService jwtService;
     private final VendorRepository vendorRepository;
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager,
                        JwtService jwtService,
-                       VendorRepository vendorRepository){
+                       VendorRepository vendorRepository,
+                       ServiceCategoryRepository serviceCategoryRepository,
+                       VendorServiceRepository vendorServiceRepository){
         this.userRepository =  userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.vendorRepository = vendorRepository;
+        this.serviceCategoryRepository = serviceCategoryRepository;
+        this.vendorServiceRepository = vendorServiceRepository;
     }
     public String register(RegisterRequest request){
         User user = userRepository.findByEmail(request.getEmail());
@@ -120,6 +134,42 @@ public class AuthService {
         vendor.setVerificationDocument(request.getVerificationDocument());
 
         vendorRepository.save(vendor);
+
+        ServiceCategory serviceCategory = serviceCategoryRepository
+                .findById(request.getService().getServiceCategoryId())
+                .orElseThrow(() ->
+                        new ServiceNotFoundException("Service not found."));
+
+        String durationText = request.getService().getDuration().trim();
+
+        Duration duration;
+
+        try {
+
+            LocalTime time = LocalTime.parse(durationText);
+
+            duration = Duration.ofHours(time.getHour())
+                    .plusMinutes(time.getMinute());
+
+        } catch (DateTimeParseException ex) {
+
+            throw new InvalidDurationException(
+                    "Duration must be in HH:mm format (e.g. 02:30).");
+        }
+
+        if (duration.isZero()) {
+            throw new InvalidDurationException(
+                    "Duration must be greater than zero.");
+        }
+
+        VendorService vendorService = new VendorService();
+
+        vendorService.setVendor(vendor);
+        vendorService.setServiceCategory(serviceCategory);
+        vendorService.setPrice(request.getService().getPrice());
+        vendorService.setDuration(duration);
+
+        vendorServiceRepository.save(vendorService);
 
         VendorRegistrationResponse response = new VendorRegistrationResponse();
         response.setVendorId(vendor.getId());

@@ -61,6 +61,12 @@ public class VendorVerificationResponse {
     )
     private Address vendorAddress;
 
+    @Valid
+    @Schema(
+            description = "Service requested by the vendor."
+    )
+    private PendingVendorServiceResponse service;
+
     @Schema(
             description = "Vendor's Aadhaar number.",
             example = "123412341234"
