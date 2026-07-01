@@ -1,6 +1,7 @@
 package com.sqts.sbvms.Exception;
 
 import com.sqts.sbvms.Dto.ApiResponse;
+import com.sqts.sbvms.Enum.BookingStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -8,6 +9,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 
@@ -352,6 +354,26 @@ public class GlobalExceptionHandler {
                 new ApiResponse<>(
                         false,
                         ex.getMessage(),
+                        null,
+                        LocalDateTime.now()
+                ),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMethodArgumentTypeMismatch(
+            MethodArgumentTypeMismatchException ex) {
+
+        String message = "Invalid date format. Please use yyyy-MM-dd.";
+
+        if (ex.getRequiredType() == BookingStatus.class) {
+            message = "Invalid booking status.";
+        }
+
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        message,
                         null,
                         LocalDateTime.now()
                 ),
