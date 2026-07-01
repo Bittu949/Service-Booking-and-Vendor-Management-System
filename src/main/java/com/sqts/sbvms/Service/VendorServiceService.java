@@ -374,6 +374,20 @@ public class VendorServiceService {
 
         return response;
     }
+    public void activateVendor(Long vendorId) {
+
+        Vendor vendor = vendorRepository.findById(vendorId)
+                .orElseThrow(() ->
+                        new VendorNotFoundException("Vendor not found."));
+
+        if (vendor.getStatus() != VendorStatus.INACTIVE)
+            throw new InvalidVendorStatusException(
+                    "Only inactive vendors can be activated.");
+
+        vendor.setStatus(VendorStatus.ACTIVE);
+
+        vendorRepository.save(vendor);
+    }
     public void removeAssignedServiceFromVendor(Long vendorId, Long serviceId) {
 
         vendorRepository.findById(vendorId)

@@ -78,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/me/vendor/bookings").hasAuthority("ROLE_VENDOR")
                         .requestMatchers(HttpMethod.PATCH, "/me/bookings/*/status").hasAuthority("ROLE_VENDOR")
                         .requestMatchers(HttpMethod.DELETE, "/me/services/*").hasAuthority("ROLE_VENDOR")
+                        .requestMatchers(HttpMethod.PATCH, "/vendor/*/activate").hasAuthority("ROLE_ADMIN")
                     .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter,

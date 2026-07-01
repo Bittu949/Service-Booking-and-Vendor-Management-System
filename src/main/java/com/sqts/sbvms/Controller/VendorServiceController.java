@@ -259,6 +259,36 @@ public class VendorServiceController {
                 HttpStatus.OK);
     }
     @Operation(
+            summary = "Activate Vendor",
+            description = "Activates an inactive vendor, allowing the vendor to receive new bookings again."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Vendor activated successfully."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Vendor is already active or cannot be activated."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Vendor not found.")
+    })
+    @PatchMapping("/vendor/{id}/activate")
+    public ResponseEntity<ApiResponse<String>> activateVendor(
+            @Parameter(
+                    description = "Vendor ID",
+                    required = true,
+                    example = "1"
+            )
+            @PathVariable("id") Long vendorId) {
+
+        vendorServiceService.activateVendor(vendorId);
+
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Vendor activated successfully.",
+                        null,
+                        LocalDateTime.now()
+                ),
+                HttpStatus.OK
+        );
+    }
+    @Operation(
             summary = "Remove Vendor Service",
             description = "Removes a previously assigned service from the specified vendor."
     )
