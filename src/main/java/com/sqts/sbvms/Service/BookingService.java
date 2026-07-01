@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -37,7 +38,8 @@ public class BookingService {
         this.vendorServiceRepository = vendorServiceRepository;
         this.vendorRepository = vendorRepository;
     }
-    public BookingResponse createBooking(BookingRequest request){
+    public BookingResponse createBooking(BookingRequest request) {
+
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
@@ -48,32 +50,51 @@ public class BookingService {
                 .orElseThrow(() ->
                         new UserNotFoundException("User not found."));
 
-        ServiceCategory serviceCategory = serviceCategoryRepository.findById(
-                request.getServiceId())
-                .orElseThrow(
-                        () -> new ServiceNotFoundException("Service not found."));
+        ServiceCategory serviceCategory =
+                serviceCategoryRepository.findById(request.getServiceId())
+                        .orElseThrow(() ->
+                                new ServiceNotFoundException("Service not found."));
 
-        if(bookingRepository.existsByUser_IdAndServiceCategory_IdAndBookingDateAndTimeSlotAndStatusIn(
+        if (request.getBookingDate().isBefore(LocalDate.now()))
+            throw new InvalidBookingDateException(
+                    "Booking date cannot be in the past.");
+
+        if (!request.getTimeSlot().getStartTime()
+                .isBefore(request.getTimeSlot().getEndTime()))
+            throw new InvalidTimeSlotException(
+                    "Start time must be before end time.");
+
+        if (request.getBookingDate().equals(LocalDate.now())
+                &&
+                request.getTimeSlot().getStartTime().isBefore(LocalTime.now()))
+            throw new InvalidTimeSlotException(
+                    "Booking time cannot be in the past.");
+
+        if (bookingRepository.existsByUser_IdAndServiceCategory_IdAndBookingDateAndTimeSlotAndStatusIn(
                 user.getId(),
                 serviceCategory.getId(),
                 request.getBookingDate(),
                 request.getTimeSlot(),
-                List.of(BookingStatus.PENDING, BookingStatus.CONFIRMED)
-        ))
+                List.of(
+                        BookingStatus.PENDING,
+                        BookingStatus.CONFIRMED
+                )))
             throw new DuplicateBookingException(
-                    "You already have an active booking for this service at the selected date and time."
-            );
+                    "You already have an active booking for this service at the selected date and time.");
 
         Booking booking = new Booking();
+
         booking.setUser(user);
         booking.setBookingDate(request.getBookingDate());
         booking.setTimeSlot(request.getTimeSlot());
         booking.setStatus(BookingStatus.PENDING);
         booking.setServiceCategory(serviceCategory);
         booking.setBookingAddress(request.getBookingAddress());
+
         bookingRepository.save(booking);
 
         BookingResponse response = new BookingResponse();
+
         response.setBookingId(booking.getId());
         response.setBookingDate(booking.getBookingDate());
         response.setStatus(booking.getStatus());
@@ -81,9 +102,10 @@ public class BookingService {
         response.setServiceName(serviceCategory.getServiceName());
         response.setCustomerName(user.getName());
         response.setBookingAddress(booking.getBookingAddress());
+
         return response;
     }
-    public BookingDetailsResponse getMyBookingById(Long bookingId){
+    public BookingDetailsResponse getMyBookingById(Long bookingId) {
 
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
@@ -95,11 +117,12 @@ public class BookingService {
                 .orElseThrow(() ->
                         new BookingNotFoundException("Booking not found."));
 
-        if(!booking.getUser().getId().equals(userDetails.getId()))
+        if (!booking.getUser().getId().equals(userDetails.getId()))
             throw new UnauthorizedAccessException(
                     "You are not authorized to view this booking.");
 
-        BookingDetailsResponse response = new BookingDetailsResponse();
+        BookingDetailsResponse response =
+                new BookingDetailsResponse();
 
         response.setBookingId(booking.getId());
         response.setBookingDate(booking.getBookingDate());
@@ -110,15 +133,37 @@ public class BookingService {
         response.setCustomerName(booking.getUser().getName());
         response.setBookingAddress(booking.getBookingAddress());
 
-        if(booking.getVendorService() != null){
+        if (booking.getVendorService() != null) {
 
-            response.setVendorId(booking.getVendorService().getVendor().getId());
-            response.setVendorName(booking.getVendorService().getVendor().getUser().getName());
-            response.setVendorAddress(booking.getVendorService().getVendor().getVendorAddress());
-            response.setFinalPrice(booking.getFinalPrice());
-            response.setEstimatedDuration(booking.getEstimatedDuration());
-            response.setAssignedAt(booking.getAssignedAt());
-            response.setCompletedAt(booking.getCompletedAt());
+            response.setVendorId(
+                    booking.getVendorService().getVendor().getId());
+
+            response.setVendorName(
+                    booking.getVendorService().getVendor().getUser().getName());
+
+            response.setVendorAddress(
+                    booking.getVendorService().getVendor().getVendorAddress());
+
+            response.setFinalPrice(
+                    booking.getFinalPrice());
+
+            Duration duration = booking.getEstimatedDuration();
+
+            if (duration != null) {
+                response.setEstimatedDuration(
+                        String.format(
+                                "%02d:%02d",
+                                duration.toHours(),
+                                duration.toMinutesPart()
+                        )
+                );
+            }
+
+            response.setAssignedAt(
+                    booking.getAssignedAt());
+
+            response.setCompletedAt(
+                    booking.getCompletedAt());
         }
 
         return response;
@@ -139,7 +184,7 @@ public class BookingService {
     }
     public UpdateBookingStatusResponse updateMyBookingStatus(
             Long bookingId,
-            UpdateBookingStatusRequest request){
+            UpdateBookingStatusRequest request) {
 
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
@@ -155,32 +200,49 @@ public class BookingService {
                 .orElseThrow(() ->
                         new BookingNotFoundException("Booking not found."));
 
-        if(booking.getVendorService() == null)
+        if (booking.getVendorService() == null)
             throw new InvalidBookingStateException(
-                    "No vendor assigned to this booking.");
+                    "No vendor has been assigned to this booking.");
 
-        if(!booking.getVendorService().getVendor().getId().equals(vendor.getId()))
+        if (!booking.getVendorService().getVendor().getId().equals(vendor.getId()))
             throw new UnauthorizedAccessException(
                     "You are not authorized to update this booking.");
 
-        if(booking.getStatus() != BookingStatus.CONFIRMED)
-            throw new InvalidBookingStateException(
-                    "Only confirmed bookings can be updated by vendors.");
+        BookingStatus currentStatus = booking.getStatus();
+        BookingStatus requestedStatus = request.getStatus();
 
-        if(request.getStatus() != BookingStatus.COMPLETED &&
-                request.getStatus() != BookingStatus.CANCELLED)
-            throw new InvalidBookingStateException(
-                    "Vendor can only update booking status to COMPLETED or CANCELLED.");
+        switch (currentStatus) {
+
+            case CONFIRMED -> {
+
+                if (requestedStatus != BookingStatus.IN_PROGRESS &&
+                        requestedStatus != BookingStatus.CANCELLED)
+                    throw new InvalidBookingStateException(
+                            "A confirmed booking can only be updated to IN_PROGRESS or CANCELLED.");
+            }
+
+            case IN_PROGRESS -> {
+
+                if (requestedStatus != BookingStatus.COMPLETED &&
+                        requestedStatus != BookingStatus.CANCELLED)
+                    throw new InvalidBookingStateException(
+                            "An in-progress booking can only be updated to COMPLETED or CANCELLED.");
+            }
+
+            default ->
+                    throw new InvalidBookingStateException(
+                            "This booking cannot be updated.");
+        }
 
         UpdateBookingStatusResponse response =
                 new UpdateBookingStatusResponse();
 
         response.setBookingId(booking.getId());
-        response.setPreviousStatus(booking.getStatus());
+        response.setPreviousStatus(currentStatus);
 
-        booking.setStatus(request.getStatus());
+        booking.setStatus(requestedStatus);
 
-        if(request.getStatus() == BookingStatus.COMPLETED){
+        if (requestedStatus == BookingStatus.COMPLETED) {
             booking.setCompletedAt(LocalDateTime.now());
         }
 
@@ -190,133 +252,258 @@ public class BookingService {
 
         return response;
     }
-    public List<PendingBookingResponse> getPendingBookings(){
-        List<PendingBookingResponse> pendingBookings = new ArrayList<>();
-        List<Booking> bookings = bookingRepository.findByStatus(BookingStatus.PENDING);
+    public List<PendingBookingResponse> getPendingBookings() {
 
-        for(Booking booking : bookings){
-            PendingBookingResponse response = new PendingBookingResponse();
+        List<Booking> bookings =
+                bookingRepository.findByStatus(BookingStatus.PENDING);
+
+        List<PendingBookingResponse> pendingBookings =
+                new ArrayList<>();
+
+        for (Booking booking : bookings) {
+
+            PendingBookingResponse response =
+                    new PendingBookingResponse();
+
             response.setBookingId(booking.getId());
             response.setBookingDate(booking.getBookingDate());
-            response.setServiceName(booking.getServiceCategory().getServiceName());
-            response.setCustomerName(booking.getUser().getName());
-            response.setStartTime(booking.getTimeSlot().getStartTime());
-            response.setEndTime(booking.getTimeSlot().getEndTime());
-            response.setStatus(booking.getStatus());
-            response.setBookingAddress(booking.getBookingAddress());
+            response.setServiceName(
+                    booking.getServiceCategory().getServiceName());
+            response.setCustomerName(
+                    booking.getUser().getName());
+            response.setStartTime(
+                    booking.getTimeSlot().getStartTime());
+            response.setEndTime(
+                    booking.getTimeSlot().getEndTime());
+            response.setStatus(
+                    booking.getStatus());
+            response.setBookingAddress(
+                    booking.getBookingAddress());
+
             pendingBookings.add(response);
         }
+
         return pendingBookings;
     }
-    public List<AvailableVendorResponse> getAvailableVendorsForBooking(Long bookingId, boolean nearby){
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException("Booking not found."));
+    public List<AvailableVendorResponse> getAvailableVendorsForBooking(
+            Long bookingId,
+            boolean nearby) {
 
-        if(booking.getStatus() != BookingStatus.PENDING)
-            throw new InvalidBookingStateException("Available vendors can only be fetched for pending bookings.");
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() ->
+                        new BookingNotFoundException("Booking not found."));
+
+        if (booking.getStatus() != BookingStatus.PENDING)
+            throw new InvalidBookingStateException(
+                    "Available vendors can only be fetched for pending bookings.");
 
         ServiceCategory serviceCategory = booking.getServiceCategory();
+
         LocalDate bookingDate = booking.getBookingDate();
-        LocalTime bookingStart = booking.getTimeSlot().getStartTime();
-        LocalTime bookingEnd = booking.getTimeSlot().getEndTime();
-        List<AvailableVendorResponse> availableVendors = new ArrayList<>();
 
-        //Fetching all the vendor service for particular service category
+        LocalTime bookingStart =
+                booking.getTimeSlot().getStartTime();
+
+        LocalTime bookingEnd =
+                booking.getTimeSlot().getEndTime();
+
         List<VendorService> vendorServices =
-                vendorServiceRepository.findByServiceCategoryId(serviceCategory.getId());
-        //Filtering only those vendor services whose vendors are active
-        vendorServices = vendorServices.stream().filter(v -> v.getVendor().getStatus() == VendorStatus.ACTIVE).toList();
+                vendorServiceRepository.findByServiceCategoryId(
+                        serviceCategory.getId());
 
-        //Check if nearby vendors only needed
-        if(nearby)
-            vendorServices = vendorServices.stream().filter(v -> v.getVendor().getVendorAddress().getPincode().equals(booking.getBookingAddress().getPincode())).toList();
+        // Only ACTIVE vendors
+        vendorServices = vendorServices.stream()
+                .filter(v ->
+                        v.getVendor().getStatus() == VendorStatus.ACTIVE)
+                .toList();
 
-        for(VendorService vendorService : vendorServices){
+        // Nearby vendors only
+        if (nearby) {
+
+            vendorServices = vendorServices.stream()
+                    .filter(v ->
+                            v.getVendor()
+                                    .getVendorAddress()
+                                    .getPincode()
+                                    .equals(
+                                            booking.getBookingAddress()
+                                                    .getPincode()
+                                    )
+                    )
+                    .toList();
+        }
+
+        List<AvailableVendorResponse> availableVendors =
+                new ArrayList<>();
+
+        for (VendorService vendorService : vendorServices) {
+
             List<Booking> vendorBookings =
-                    bookingRepository.findByVendorServiceVendorId(vendorService.getVendor().getId());
+                    bookingRepository.findByVendorServiceVendorId(
+                            vendorService.getVendor().getId());
 
             boolean hasOverlap = vendorBookings.stream()
-                    .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
-                    .filter(b -> b.getBookingDate().equals(bookingDate))
+
+                    // Vendor is busy if booking is CONFIRMED or IN_PROGRESS
+                    .filter(b ->
+                            b.getStatus() == BookingStatus.CONFIRMED
+                                    ||
+                                    b.getStatus() == BookingStatus.IN_PROGRESS)
+
+                    .filter(b ->
+                            b.getBookingDate().equals(bookingDate))
+
                     .anyMatch(b ->
-                            bookingStart.isBefore(b.getTimeSlot().getEndTime())
+                            bookingStart.isBefore(
+                                    b.getTimeSlot().getEndTime())
                                     &&
-                                    bookingEnd.isAfter(b.getTimeSlot().getStartTime())
-                    );
-            if(!hasOverlap){
+                                    bookingEnd.isAfter(
+                                            b.getTimeSlot().getStartTime()));
+
+            if (!hasOverlap) {
+
                 Vendor vendor = vendorService.getVendor();
-                AvailableVendorResponse response = new AvailableVendorResponse();
+
+                AvailableVendorResponse response =
+                        new AvailableVendorResponse();
+
                 response.setVendorId(vendor.getId());
                 response.setVendorName(vendor.getUser().getName());
                 response.setVendorEmail(vendor.getUser().getEmail());
                 response.setStatus(vendor.getStatus());
+
                 response.setPrice(vendorService.getPrice());
-                response.setVendorAddress(vendor.getVendorAddress());
+
+                // Convert Duration -> HH:mm
+                Duration duration = vendorService.getDuration();
+
+                response.setEstimatedDuration(
+                        String.format(
+                                "%02d:%02d",
+                                duration.toHours(),
+                                duration.toMinutesPart()
+                        )
+                );
+
+                response.setVendorAddress(
+                        vendor.getVendorAddress());
 
                 availableVendors.add(response);
             }
         }
+
         return availableVendors;
     }
-    public AssignVendorResponse assignVendorToBooking(AssignVendorRequest request,
-                                                      Long bookingId){
-        VendorService vendorService = vendorServiceRepository.findById(request.getVendorServiceId())
-                .orElseThrow(() -> new ServiceAssignmentNotFoundException("No vendor service found."));
+    public AssignVendorResponse assignVendorToBooking(
+            AssignVendorRequest request,
+            Long bookingId) {
+
+        VendorService vendorService = vendorServiceRepository
+                .findById(request.getVendorServiceId())
+                .orElseThrow(() ->
+                        new ServiceAssignmentNotFoundException(
+                                "No vendor service found."));
+
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new BookingNotFoundException("Booking not found."));
+                .orElseThrow(() ->
+                        new BookingNotFoundException("Booking not found."));
 
-        if(vendorService.getVendor().getStatus() != VendorStatus.ACTIVE)
-            throw new InvalidVendorStatusException("Please select active vendor.");
+        if (vendorService.getVendor().getStatus() != VendorStatus.ACTIVE)
+            throw new InvalidVendorStatusException(
+                    "Please select an active vendor.");
 
-        if(booking.getStatus() != BookingStatus.PENDING)
-            throw new InvalidBookingStateException("This booking may have been completed or already assigned to a vendor.");
+        if (booking.getStatus() != BookingStatus.PENDING)
+            throw new InvalidBookingStateException(
+                    "Only pending bookings can be assigned to a vendor.");
 
         LocalDate bookingDate = booking.getBookingDate();
         LocalTime bookingStart = booking.getTimeSlot().getStartTime();
         LocalTime bookingEnd = booking.getTimeSlot().getEndTime();
 
-        //Get all bookings of this vendor
         List<Booking> vendorBookings =
-                bookingRepository.findByVendorServiceVendorId(vendorService.getVendor().getId());
+                bookingRepository.findByVendorServiceVendorId(
+                        vendorService.getVendor().getId());
 
         boolean hasOverlap = vendorBookings.stream()
-                .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
-                .filter(b -> b.getBookingDate().equals(bookingDate))
+                .filter(b ->
+                        b.getStatus() == BookingStatus.CONFIRMED
+                                || b.getStatus() == BookingStatus.IN_PROGRESS)
+                .filter(b ->
+                        b.getBookingDate().equals(bookingDate))
                 .anyMatch(b ->
-                        bookingStart.isBefore(b.getTimeSlot().getEndTime())
+                        bookingStart.isBefore(
+                                b.getTimeSlot().getEndTime())
                                 &&
-                                bookingEnd.isAfter(b.getTimeSlot().getStartTime())
-                );
-        if(hasOverlap){
-           throw new InvalidTimeSlotException("Vendor is not available for this time slot.");
-        }
+                                bookingEnd.isAfter(
+                                        b.getTimeSlot().getStartTime()));
 
-        booking.setStatus(BookingStatus.CONFIRMED);
+        if (hasOverlap)
+            throw new InvalidTimeSlotException(
+                    "Vendor is not available for this time slot.");
+
+        Duration bookingDuration =
+                Duration.between(bookingStart, bookingEnd);
+
+        long bookingMinutes = bookingDuration.toMinutes();
+
+        long vendorMinutes = vendorService.getDuration().toMinutes();
+
+        long finalPrice =
+                (vendorService.getPrice() * bookingMinutes)
+                        / vendorMinutes;
+
         booking.setVendorService(vendorService);
-        booking.setFinalPrice(vendorService.getPrice());
+        booking.setFinalPrice(finalPrice);
         booking.setEstimatedDuration(vendorService.getDuration());
         booking.setAssignedAt(LocalDateTime.now());
+        booking.setStatus(BookingStatus.CONFIRMED);
+
         bookingRepository.save(booking);
 
-        AssignVendorResponse response = new AssignVendorResponse();
+        AssignVendorResponse response =
+                new AssignVendorResponse();
+
         response.setBookingId(booking.getId());
         response.setBookingStatus(booking.getStatus());
         response.setBookingDate(booking.getBookingDate());
-        response.setServiceName(booking.getServiceCategory().getServiceName());
-        response.setCustomerName(booking.getUser().getName());
-        response.setVendorName(booking.getVendorService().getVendor().getUser().getName());
-        response.setStartTime(booking.getTimeSlot().getStartTime());
-        response.setEndTime(booking.getTimeSlot().getEndTime());
-        response.setBookingAddress(booking.getBookingAddress());
-        response.setVendorAddress(booking.getVendorService().getVendor().getVendorAddress());
-        response.setFinalPrice(booking.getFinalPrice());
-        response.setEstimatedDuration(booking.getEstimatedDuration());
+        response.setServiceName(
+                booking.getServiceCategory().getServiceName());
+        response.setCustomerName(
+                booking.getUser().getName());
+        response.setVendorName(
+                vendorService.getVendor().getUser().getName());
+        response.setStartTime(
+                booking.getTimeSlot().getStartTime());
+        response.setEndTime(
+                booking.getTimeSlot().getEndTime());
+        response.setBookingAddress(
+                booking.getBookingAddress());
+        response.setVendorAddress(
+                vendorService.getVendor().getVendorAddress());
+        response.setFinalPrice(
+                booking.getFinalPrice());
+
+        Duration duration = booking.getEstimatedDuration();
+
+        response.setEstimatedDuration(
+                String.format(
+                        "%02d:%02d",
+                        duration.toHours(),
+                        duration.toMinutesPart()
+                )
+        );
 
         return response;
     }
-    public BookingDetailsResponse getBookingById(Long bookingId){
+    public BookingDetailsResponse getBookingById(Long bookingId) {
+
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new BookingNotFoundException("Booking not found."));
-        BookingDetailsResponse response = new BookingDetailsResponse();
+                .orElseThrow(() ->
+                        new BookingNotFoundException("Booking not found."));
+
+        BookingDetailsResponse response =
+                new BookingDetailsResponse();
+
         response.setBookingId(booking.getId());
         response.setBookingDate(booking.getBookingDate());
         response.setBookingStatus(booking.getStatus());
@@ -326,48 +513,96 @@ public class BookingService {
         response.setCustomerName(booking.getUser().getName());
         response.setBookingAddress(booking.getBookingAddress());
 
-        if(booking.getVendorService() != null) {
-            response.setVendorId(booking.getVendorService().getVendor().getId());
-            response.setVendorName(booking.getVendorService().getVendor().getUser().getName());
-            response.setVendorAddress(booking.getVendorService().getVendor().getVendorAddress());
-            response.setFinalPrice(booking.getFinalPrice());
-            response.setEstimatedDuration(booking.getEstimatedDuration());
-            response.setAssignedAt(booking.getAssignedAt());
-            response.setCompletedAt(booking.getCompletedAt());
+        if (booking.getVendorService() != null) {
+
+            response.setVendorId(
+                    booking.getVendorService().getVendor().getId());
+
+            response.setVendorName(
+                    booking.getVendorService().getVendor().getUser().getName());
+
+            response.setVendorAddress(
+                    booking.getVendorService().getVendor().getVendorAddress());
+
+            response.setFinalPrice(
+                    booking.getFinalPrice());
+
+            if (booking.getEstimatedDuration() != null) {
+
+                response.setEstimatedDuration(
+                        String.format(
+                                "%02d:%02d",
+                                booking.getEstimatedDuration().toHours(),
+                                booking.getEstimatedDuration().toMinutesPart()
+                        )
+                );
+            }
+
+            response.setAssignedAt(
+                    booking.getAssignedAt());
+
+            response.setCompletedAt(
+                    booking.getCompletedAt());
         }
 
         return response;
     }
-    public List<BookingHistoryResponse> getCustomerBookingHistory(Long customerId){
+    public List<BookingHistoryResponse> getCustomerBookingHistory(Long customerId) {
+
         User customer = userRepository.findById(customerId)
-                .orElseThrow(() -> new UserNotFoundException("Customer not found."));
+                .orElseThrow(() ->
+                        new UserNotFoundException("Customer not found."));
 
-        List<BookingHistoryResponse> responses = new ArrayList<>();
-        List<Booking> bookings = bookingRepository.findByUserId(customer.getId());
+        List<Booking> bookings =
+                bookingRepository.findByUserId(customer.getId());
 
-        for(Booking booking : bookings){
-            BookingHistoryResponse bookingHistoryResponse = new BookingHistoryResponse();
-            bookingHistoryResponse.setBookingId(booking.getId());
-            bookingHistoryResponse.setBookingDate(booking.getBookingDate());
-            bookingHistoryResponse.setBookingStatus(booking.getStatus());
-            bookingHistoryResponse.setStartTime(booking.getTimeSlot().getStartTime());
-            bookingHistoryResponse.setEndTime(booking.getTimeSlot().getEndTime());
-            bookingHistoryResponse.setServiceName(booking.getServiceCategory().getServiceName());
-            bookingHistoryResponse.setBookingAddress(booking.getBookingAddress());
+        List<BookingHistoryResponse> responses =
+                new ArrayList<>();
+
+        for (Booking booking : bookings) {
+
+            BookingHistoryResponse response =
+                    new BookingHistoryResponse();
+
+            response.setBookingId(booking.getId());
+            response.setBookingDate(booking.getBookingDate());
+            response.setBookingStatus(booking.getStatus());
+            response.setStartTime(booking.getTimeSlot().getStartTime());
+            response.setEndTime(booking.getTimeSlot().getEndTime());
+            response.setServiceName(
+                    booking.getServiceCategory().getServiceName());
+            response.setBookingAddress(
+                    booking.getBookingAddress());
 
             VendorService vendorService = booking.getVendorService();
-            if(vendorService != null) {
+
+            if (vendorService != null) {
+
                 Vendor vendor = vendorService.getVendor();
-                bookingHistoryResponse.setVendorId(vendor.getId());
-                bookingHistoryResponse.setVendorName(vendor.getUser().getName());
-                bookingHistoryResponse.setVendorAddress(vendor.getVendorAddress());
-                bookingHistoryResponse.setFinalPrice(booking.getFinalPrice());
-                bookingHistoryResponse.setEstimatedDuration(booking.getEstimatedDuration());
-                bookingHistoryResponse.setAssignedAt(booking.getAssignedAt());
-                bookingHistoryResponse.setCompletedAt(booking.getCompletedAt());
+
+                response.setVendorId(vendor.getId());
+                response.setVendorName(vendor.getUser().getName());
+                response.setVendorAddress(vendor.getVendorAddress());
+                response.setFinalPrice(booking.getFinalPrice());
+
+                if (booking.getEstimatedDuration() != null) {
+
+                    response.setEstimatedDuration(
+                            String.format(
+                                    "%02d:%02d",
+                                    booking.getEstimatedDuration().toHours(),
+                                    booking.getEstimatedDuration().toMinutesPart()
+                            )
+                    );
+                }
+
+                response.setAssignedAt(booking.getAssignedAt());
+                response.setCompletedAt(booking.getCompletedAt());
             }
-            responses.add(bookingHistoryResponse);
+
+            responses.add(response);
         }
+
         return responses;
     }
     public UpdateBookingStatusResponse updateBookingStatus(
@@ -378,86 +613,143 @@ public class BookingService {
                 .orElseThrow(() ->
                         new BookingNotFoundException("Booking not found."));
 
-        if (booking.getStatus() != BookingStatus.PENDING)
+        if (booking.getStatus() != BookingStatus.PENDING
+                &&
+                booking.getStatus() != BookingStatus.CONFIRMED)
             throw new InvalidBookingStateException(
-                    "Only pending bookings can be updated by the administrator.");
+                    "Only pending or confirmed bookings can be cancelled by the administrator.");
 
         if (request.getStatus() != BookingStatus.CANCELLED)
             throw new InvalidBookingStateException(
-                    "Administrator can only cancel pending bookings.");
+                    "Administrator can only change the booking status to CANCELLED.");
 
-        UpdateBookingStatusResponse response = new UpdateBookingStatusResponse();
+        UpdateBookingStatusResponse response =
+                new UpdateBookingStatusResponse();
 
         response.setBookingId(booking.getId());
         response.setPreviousStatus(booking.getStatus());
 
         booking.setStatus(BookingStatus.CANCELLED);
+
         bookingRepository.save(booking);
 
         response.setCurrentStatus(booking.getStatus());
 
         return response;
     }
-    public List<VendorBookingHistoryResponse> getVendorBookingHistory(Long vendorId){
+    public List<VendorBookingHistoryResponse> getVendorBookingHistory(Long vendorId) {
+
         if (!vendorRepository.existsById(vendorId)) {
             throw new VendorNotFoundException("Vendor not found.");
         }
-        List<Booking> bookings = bookingRepository.findByVendorServiceVendorId(vendorId);
-        List<VendorBookingHistoryResponse> responses = new ArrayList<>();
 
-        for (Booking booking : bookings){
-            VendorBookingHistoryResponse bookingHistoryResponse = new VendorBookingHistoryResponse();
-            bookingHistoryResponse.setBookingId(booking.getId());
-            bookingHistoryResponse.setCustomerName(booking.getUser().getName());
-            bookingHistoryResponse.setServiceName(booking.getServiceCategory().getServiceName());
-            bookingHistoryResponse.setBookingStatus(booking.getStatus());
-            bookingHistoryResponse.setDate(booking.getBookingDate());
-            bookingHistoryResponse.setTimeSlot(booking.getTimeSlot());
-            bookingHistoryResponse.setBookingAddress(booking.getBookingAddress());
-            bookingHistoryResponse.setFinalPrice(booking.getFinalPrice());
-            bookingHistoryResponse.setEstimatedDuration(booking.getEstimatedDuration());
-            bookingHistoryResponse.setAssignedAt(booking.getAssignedAt());
-            bookingHistoryResponse.setCompletedAt(booking.getCompletedAt());
+        List<Booking> bookings =
+                bookingRepository.findByVendorServiceVendorId(vendorId);
 
-            responses.add(bookingHistoryResponse);
+        List<VendorBookingHistoryResponse> responses =
+                new ArrayList<>();
+
+        for (Booking booking : bookings) {
+
+            VendorBookingHistoryResponse response =
+                    new VendorBookingHistoryResponse();
+
+            response.setBookingId(booking.getId());
+            response.setCustomerName(booking.getUser().getName());
+            response.setServiceName(
+                    booking.getServiceCategory().getServiceName());
+            response.setBookingStatus(booking.getStatus());
+            response.setDate(booking.getBookingDate());
+            response.setTimeSlot(booking.getTimeSlot());
+            response.setBookingAddress(booking.getBookingAddress());
+            response.setFinalPrice(booking.getFinalPrice());
+
+            if (booking.getEstimatedDuration() != null) {
+
+                response.setEstimatedDuration(
+                        String.format(
+                                "%02d:%02d",
+                                booking.getEstimatedDuration().toHours(),
+                                booking.getEstimatedDuration().toMinutesPart()
+                        )
+                );
+            }
+
+            response.setAssignedAt(booking.getAssignedAt());
+            response.setCompletedAt(booking.getCompletedAt());
+
+            responses.add(response);
         }
+
         return responses;
     }
-    public List<BookingHistoryResponse> getFilteredBookings(BookingStatus bookingStatus, LocalDate bookingDate){
+    public List<BookingHistoryResponse> getFilteredBookings(
+            BookingStatus bookingStatus,
+            LocalDate bookingDate) {
+
         List<Booking> bookings = bookingRepository.findAll();
-        List<BookingHistoryResponse> allBookings = new ArrayList<>();
 
-        //Filter bookings on booking status
-        if(bookingStatus != null)
-            bookings = bookings.stream().filter(b -> b.getStatus() == bookingStatus).toList();
+        List<BookingHistoryResponse> allBookings =
+                new ArrayList<>();
 
-        //Filter bookings on booking date
-        if(bookingDate != null)
-            bookings = bookings.stream().filter(b -> b.getBookingDate().equals(bookingDate)).toList();
+        // Filter bookings by status
+        if (bookingStatus != null)
+            bookings = bookings.stream()
+                    .filter(b -> b.getStatus() == bookingStatus)
+                    .toList();
 
-        for(Booking booking : bookings){
-            BookingHistoryResponse response = new BookingHistoryResponse();
+        // Filter bookings by date
+        if (bookingDate != null)
+            bookings = bookings.stream()
+                    .filter(b -> b.getBookingDate().equals(bookingDate))
+                    .toList();
+
+        for (Booking booking : bookings) {
+
+            BookingHistoryResponse response =
+                    new BookingHistoryResponse();
+
             VendorService vendorService = booking.getVendorService();
-            if(vendorService != null) {
+
+            if (vendorService != null) {
+
                 Vendor vendor = vendorService.getVendor();
+
                 response.setVendorId(vendor.getId());
                 response.setVendorName(vendor.getUser().getName());
                 response.setVendorAddress(vendor.getVendorAddress());
                 response.setFinalPrice(booking.getFinalPrice());
-                response.setEstimatedDuration(booking.getEstimatedDuration());
+
+                if (booking.getEstimatedDuration() != null) {
+
+                    response.setEstimatedDuration(
+                            String.format(
+                                    "%02d:%02d",
+                                    booking.getEstimatedDuration().toHours(),
+                                    booking.getEstimatedDuration().toMinutesPart()
+                            )
+                    );
+                }
+
                 response.setAssignedAt(booking.getAssignedAt());
                 response.setCompletedAt(booking.getCompletedAt());
             }
+
             response.setBookingId(booking.getId());
             response.setBookingStatus(booking.getStatus());
             response.setBookingDate(booking.getBookingDate());
-            response.setServiceName(booking.getServiceCategory().getServiceName());
-            response.setStartTime(booking.getTimeSlot().getStartTime());
-            response.setEndTime(booking.getTimeSlot().getEndTime());
-            response.setBookingAddress(booking.getBookingAddress());
+            response.setServiceName(
+                    booking.getServiceCategory().getServiceName());
+            response.setStartTime(
+                    booking.getTimeSlot().getStartTime());
+            response.setEndTime(
+                    booking.getTimeSlot().getEndTime());
+            response.setBookingAddress(
+                    booking.getBookingAddress());
 
             allBookings.add(response);
         }
+
         return allBookings;
     }
     public Long getBookingsCount(){
@@ -492,9 +784,11 @@ public class BookingService {
             throw new UnauthorizedException(
                     "You can only cancel your own bookings.");
 
-        if (booking.getStatus() != BookingStatus.PENDING)
+        if (booking.getStatus() != BookingStatus.PENDING
+                &&
+                booking.getStatus() != BookingStatus.CONFIRMED)
             throw new InvalidOperationException(
-                    "Only pending bookings can be cancelled.");
+                    "Booking can only be cancelled before the vendor starts the service.");
 
         BookingStatus previousStatus = booking.getStatus();
 

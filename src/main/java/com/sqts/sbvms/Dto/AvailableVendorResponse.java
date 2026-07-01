@@ -44,6 +44,12 @@ public class AvailableVendorResponse {
     private Long price;
 
     @Schema(
+            description = "Estimated duration required to complete the service in HH:mm format.",
+            example = "02:00"
+    )
+    private String estimatedDuration;
+
+    @Schema(
             description = "Current approval status of the vendor.",
             example = "ACTIVE"
     )

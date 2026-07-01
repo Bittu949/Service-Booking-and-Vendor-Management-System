@@ -94,7 +94,7 @@ public class BookingHistoryResponse {
             description = "Estimated duration required to complete the service.",
             example = "PT2H"
     )
-    private Duration estimatedDuration;
+    private String estimatedDuration;
 
     @Schema(
             description = "Date and time when the vendor was assigned.",

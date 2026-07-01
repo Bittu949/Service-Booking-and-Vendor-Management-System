@@ -91,5 +91,5 @@ public class AssignVendorResponse {
             description = "Estimated duration required to complete the service.",
             example = "PT2H"
     )
-    private Duration estimatedDuration;
+    private String estimatedDuration;
 }

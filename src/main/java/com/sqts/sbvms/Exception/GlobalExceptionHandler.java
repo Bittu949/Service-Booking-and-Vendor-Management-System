@@ -380,4 +380,18 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
     }
+    @ExceptionHandler(InvalidBookingDateException.class)
+    public ResponseEntity<ApiResponse<Object>> handleInvalidBookingDateException(
+            InvalidBookingDateException ex) {
+
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()
+                ),
+                HttpStatus.BAD_REQUEST
+        );
+    }
 }
