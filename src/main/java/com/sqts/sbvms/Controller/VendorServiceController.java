@@ -532,4 +532,34 @@ public class VendorServiceController {
                 HttpStatus.OK
         );
     }
+    @Operation(
+            summary = "Remove My Service",
+            description = "Allows the logged-in vendor to remove one of their assigned services. A vendor must always have at least one active service."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Service removed successfully."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Vendor must have at least one active service."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Service assignment not found.")
+    })
+    @DeleteMapping("/me/services/{serviceId}")
+    public ResponseEntity<ApiResponse<String>> removeMyService(
+            @Parameter(
+                    description = "Service Category ID",
+                    required = true,
+                    example = "1"
+            )
+            @PathVariable Long serviceId) {
+
+        vendorServiceService.removeMyService(serviceId);
+
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        "Service removed successfully.",
+                        null,
+                        LocalDateTime.now()
+                ),
+                HttpStatus.OK
+        );
+    }
 }

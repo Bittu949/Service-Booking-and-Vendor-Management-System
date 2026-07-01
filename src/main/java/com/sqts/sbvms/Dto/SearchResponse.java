@@ -50,10 +50,10 @@ public class SearchResponse {
     private Long price;
 
     @Schema(
-            description = "Estimated duration required to complete the service.",
-            example = "PT2H"
+            description = "Estimated duration required to complete the service in HH:mm format.",
+            example = "02:00"
     )
-    private Duration duration;
+    private String duration;
 
     @Valid
     @Schema(

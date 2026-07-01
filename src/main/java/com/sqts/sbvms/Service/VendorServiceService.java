@@ -21,6 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -284,40 +286,108 @@ public class VendorServiceService {
         vendorRepository.save(vendor);
         return response;
     }
-    public void removeAssignedServiceFromVendor(Long vendorId, Long serviceId){
-        vendorRepository.findById(vendorId).orElseThrow(() -> new VendorNotFoundException("Vendor not found."));
-        serviceCategoryRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException("Service not found."));
+    public void removeAssignedServiceFromVendor(Long vendorId, Long serviceId) {
+
+        vendorRepository.findById(vendorId)
+                .orElseThrow(() ->
+                        new VendorNotFoundException("Vendor not found."));
+
+        serviceCategoryRepository.findById(serviceId)
+                .orElseThrow(() ->
+                        new ServiceNotFoundException("Service not found."));
 
         VendorService vendorService = vendorServiceRepository
                 .findByVendor_idAndServiceCategory_id(vendorId, serviceId);
 
-        if(vendorService == null)
+        if (vendorService == null)
             throw new VendorServiceNotFoundException(
                     "Vendor is not assigned this service.");
 
+        long totalServices = vendorServiceRepository.countByVendor_Id(vendorId);
+
+        if (totalServices == 1)
+            throw new LastVendorServiceRemovalException(
+                    "A vendor must have at least one active service.");
+
         vendorServiceRepository.delete(vendorService);
     }
-    public ServiceUpdationResponse updateAssignedServiceDetails(Long vendorId, Long serviceId, ServiceUpdationRequest request){
-        if(request==null)
-            throw new InvalidInputException("Please provide details to update");
-        VendorService vendorService = vendorServiceRepository.findByVendor_idAndServiceCategory_id(vendorId, serviceId);
-        if(vendorService == null)
+    public ServiceUpdationResponse updateAssignedServiceDetails(
+            Long vendorId,
+            Long serviceId,
+            ServiceUpdationRequest request) {
+
+        if (request == null)
+            throw new InvalidInputException("Please provide details to update.");
+
+        VendorService vendorService =
+                vendorServiceRepository.findByVendor_idAndServiceCategory_id(
+                        vendorId,
+                        serviceId);
+
+        if (vendorService == null)
             throw new ServiceNotFoundException("Service not found.");
-        if(vendorService.getVendor().getStatus() != VendorStatus.ACTIVE)
+
+        if (vendorService.getVendor().getStatus() != VendorStatus.ACTIVE)
             throw new InvalidVendorStatusException("Vendor is not active.");
-        if(request.getDuration() != null)
-            vendorService.setDuration(request.getDuration());
-        if(request.getPrice() != null)
+
+        if (request.getDuration() != null &&
+                !request.getDuration().isBlank()) {
+
+            Duration duration;
+
+            try {
+
+                LocalTime time =
+                        LocalTime.parse(request.getDuration().trim());
+
+                duration = Duration.ofHours(time.getHour())
+                        .plusMinutes(time.getMinute());
+
+            } catch (DateTimeParseException ex) {
+
+                throw new InvalidDurationException(
+                        "Duration must be in HH:mm format (e.g. 02:30).");
+            }
+
+            if (duration.isZero())
+                throw new InvalidDurationException(
+                        "Duration must be greater than zero.");
+
+            vendorService.setDuration(duration);
+        }
+
+        if (request.getPrice() != null)
             vendorService.setPrice(request.getPrice());
+
         vendorServiceRepository.save(vendorService);
-        ServiceUpdationResponse response = new ServiceUpdationResponse();
-        response.setVendorName(vendorService.getVendor().getUser().getName());
-        response.setServiceName(vendorService.getServiceCategory().getServiceName());
+
+        Duration duration = vendorService.getDuration();
+
+        ServiceUpdationResponse response =
+                new ServiceUpdationResponse();
+
+        response.setVendorName(
+                vendorService.getVendor().getUser().getName());
+
+        response.setServiceName(
+                vendorService.getServiceCategory().getServiceName());
+
         response.setPrice(vendorService.getPrice());
-        response.setDuration(vendorService.getDuration());
+
+        response.setDuration(
+                String.format(
+                        "%02d:%02d",
+                        duration.toHours(),
+                        duration.toMinutesPart()
+                )
+        );
+
         return response;
     }
-    public List<SearchResponse> searchVendorServicesByVendorOrService(String vendorName, String serviceName){
+    public List<SearchResponse> searchVendorServicesByVendorOrService(
+            String vendorName,
+            String serviceName) {
+
         List<VendorService> vendorServices = vendorServiceRepository.findAll();
         List<SearchResponse> responses = new ArrayList<>();
 
@@ -325,44 +395,98 @@ public class VendorServiceService {
                 .filter(v -> v.getVendor().getStatus() == VendorStatus.ACTIVE)
                 .toList();
 
-        if(vendorName != null && !vendorName.isBlank())
-            vendorServices = vendorServices.stream().filter(v -> v.getVendor().getUser() != null &&
-                                                                 v.getVendor().getUser().getName() != null &&
-                                                                 v.getVendor().getUser().getName().trim().toLowerCase().contains(vendorName.trim().toLowerCase())).toList();
-        if(serviceName != null && !serviceName.isBlank())
-            vendorServices = vendorServices.stream().filter(v -> v.getServiceCategory() != null &&
-                                                                 v.getServiceCategory().getServiceName() != null &&
-                                                                 v.getServiceCategory().getServiceName().trim().toLowerCase().contains(serviceName.trim().toLowerCase())).toList();
-        for(VendorService service : vendorServices){
+        if (vendorName != null && !vendorName.isBlank()) {
+            vendorServices = vendorServices.stream()
+                    .filter(v ->
+                            v.getVendor().getUser() != null
+                                    && v.getVendor().getUser().getName() != null
+                                    && v.getVendor().getUser().getName()
+                                    .trim()
+                                    .toLowerCase()
+                                    .contains(vendorName.trim().toLowerCase()))
+                    .toList();
+        }
+
+        if (serviceName != null && !serviceName.isBlank()) {
+            vendorServices = vendorServices.stream()
+                    .filter(v ->
+                            v.getServiceCategory() != null
+                                    && v.getServiceCategory().getServiceName() != null
+                                    && v.getServiceCategory().getServiceName()
+                                    .trim()
+                                    .toLowerCase()
+                                    .contains(serviceName.trim().toLowerCase()))
+                    .toList();
+        }
+
+        for (VendorService service : vendorServices) {
+
+            Duration duration = service.getDuration();
+
             SearchResponse searchResponse = new SearchResponse();
+
             searchResponse.setVendorId(service.getVendor().getId());
             searchResponse.setVendorName(service.getVendor().getUser().getName());
             searchResponse.setVendorEmail(service.getVendor().getUser().getEmail());
             searchResponse.setServiceName(service.getServiceCategory().getServiceName());
             searchResponse.setPrice(service.getPrice());
-            searchResponse.setDuration(service.getDuration());
+
+            searchResponse.setDuration(
+                    String.format(
+                            "%02d:%02d",
+                            duration.toHours(),
+                            duration.toMinutesPart()
+                    )
+            );
+
             searchResponse.setVendorAddress(service.getVendor().getVendorAddress());
+
             responses.add(searchResponse);
         }
+
         return responses;
     }
-    public SearchResponse getSingleAssignedServiceOfVendor(Long vendorId, Long serviceId){
-        Vendor vendor = vendorRepository.findById(vendorId).orElseThrow(() -> new VendorNotFoundException("Vendor not found."));
+    public SearchResponse getSingleAssignedServiceOfVendor(
+            Long vendorId,
+            Long serviceId) {
 
-        ServiceCategory service = serviceCategoryRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException("Service not found."));
-        VendorService vendorService = vendorServiceRepository.findByVendor_idAndServiceCategory_id(vendor.getId(), service.getId());
+        Vendor vendor = vendorRepository.findById(vendorId)
+                .orElseThrow(() ->
+                        new VendorNotFoundException("Vendor not found."));
 
-        if(vendorService == null)
-            throw new ServiceAssignmentNotFoundException("Service assignment not found.");
+        ServiceCategory service = serviceCategoryRepository.findById(serviceId)
+                .orElseThrow(() ->
+                        new ServiceNotFoundException("Service not found."));
+
+        VendorService vendorService =
+                vendorServiceRepository.findByVendor_idAndServiceCategory_id(
+                        vendor.getId(),
+                        service.getId());
+
+        if (vendorService == null)
+            throw new ServiceAssignmentNotFoundException(
+                    "Service assignment not found.");
+
+        Duration duration = vendorService.getDuration();
 
         SearchResponse response = new SearchResponse();
+
         response.setVendorId(vendor.getId());
         response.setVendorName(vendor.getUser().getName());
         response.setVendorEmail(vendor.getUser().getEmail());
         response.setServiceName(service.getServiceName());
         response.setPrice(vendorService.getPrice());
-        response.setDuration(vendorService.getDuration());
+
+        response.setDuration(
+                String.format(
+                        "%02d:%02d",
+                        duration.toHours(),
+                        duration.toMinutesPart()
+                )
+        );
+
         response.setVendorAddress(vendor.getVendorAddress());
+
         return response;
     }
     public VendorSummaryResponse viewDashboardSummary(Long vendorId){
@@ -505,7 +629,7 @@ public class VendorServiceService {
 
         return response;
     }
-    public SearchResponse getMyService(Long serviceId){
+    public SearchResponse getMyService(Long serviceId) {
 
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
@@ -526,9 +650,11 @@ public class VendorServiceService {
                         vendor.getId(),
                         serviceCategory.getId());
 
-        if(vendorService == null)
+        if (vendorService == null)
             throw new ServiceAssignmentNotFoundException(
                     "Service assignment not found.");
+
+        Duration duration = vendorService.getDuration();
 
         SearchResponse response = new SearchResponse();
 
@@ -537,9 +663,52 @@ public class VendorServiceService {
         response.setVendorEmail(vendor.getUser().getEmail());
         response.setServiceName(serviceCategory.getServiceName());
         response.setPrice(vendorService.getPrice());
-        response.setDuration(vendorService.getDuration());
+
+        response.setDuration(
+                String.format(
+                        "%02d:%02d",
+                        duration.toHours(),
+                        duration.toMinutesPart()
+                )
+        );
+
         response.setVendorAddress(vendor.getVendorAddress());
 
         return response;
+    }
+    public void removeMyService(Long serviceId) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        Vendor vendor = vendorRepository.findByUserId(userDetails.getId())
+                .orElseThrow(() ->
+                        new VendorNotFoundException("Vendor not found."));
+
+        ServiceCategory serviceCategory = serviceCategoryRepository
+                .findById(serviceId)
+                .orElseThrow(() ->
+                        new ServiceNotFoundException("Service not found."));
+
+        VendorService vendorService =
+                vendorServiceRepository.findByVendor_idAndServiceCategory_id(
+                        vendor.getId(),
+                        serviceCategory.getId());
+
+        if (vendorService == null)
+            throw new ServiceAssignmentNotFoundException(
+                    "Service assignment not found.");
+
+        long totalServices =
+                vendorServiceRepository.countByVendor_Id(vendor.getId());
+
+        if (totalServices == 1)
+            throw new LastVendorServiceRemovalException(
+                    "A vendor must have at least one active service.");
+
+        vendorServiceRepository.delete(vendorService);
     }
 }

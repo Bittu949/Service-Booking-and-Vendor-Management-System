@@ -344,4 +344,18 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
     }
+    @ExceptionHandler(LastVendorServiceRemovalException.class)
+    public ResponseEntity<ApiResponse<Object>> handleLastVendorServiceRemovalException(
+            LastVendorServiceRemovalException ex) {
+
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        false,
+                        ex.getMessage(),
+                        null,
+                        LocalDateTime.now()
+                ),
+                HttpStatus.BAD_REQUEST
+        );
+    }
 }

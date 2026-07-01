@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Duration;
-
 @Schema(
         name = "ServiceUpdationResponse",
         description = "Response returned after successfully updating the price or estimated duration of a vendor's assigned service."
@@ -37,8 +35,8 @@ public class ServiceUpdationResponse {
     private Long price;
 
     @Schema(
-            description = "Updated estimated duration required to complete the service.",
-            example = "PT3H"
+            description = "Updated estimated duration in HH:mm format.",
+            example = "03:00"
     )
-    private Duration duration;
+    private String duration;
 }
