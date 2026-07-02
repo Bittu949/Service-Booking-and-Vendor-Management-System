@@ -14,10 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-@Tag(
-        name = "Vendor Management",
-        description = "APIs for vendor profile management, approval, service assignment and administration."
-)
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 public class VendorServiceController {
@@ -26,6 +22,7 @@ public class VendorServiceController {
         this.vendorServiceService = vendorServiceService;
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get Pending Vendor Requests",
             description = "Retrieves all vendor registration requests that are waiting for administrator approval."
     )
@@ -52,6 +49,7 @@ public class VendorServiceController {
         );
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "View Vendor Verification Details",
             description = "Retrieves complete vendor registration details including uploaded verification documents for administrator review."
     )
@@ -79,6 +77,7 @@ public class VendorServiceController {
         );
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Approve Vendor",
             description = "Approves a pending vendor registration request and changes the vendor status to ACTIVE."
     )
@@ -109,6 +108,7 @@ public class VendorServiceController {
         );
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Reject Vendor",
             description = "Rejects a pending vendor registration request."
     )
@@ -139,6 +139,7 @@ public class VendorServiceController {
         );
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get All Vendors",
             description = "Retrieves all vendors registered in the system along with their profile details."
     )
@@ -157,6 +158,7 @@ public class VendorServiceController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get Vendor Services",
             description = "Retrieves all services currently assigned to the specified vendor."
     )
@@ -181,6 +183,7 @@ public class VendorServiceController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get Vendor Details",
             description = "Retrieves complete profile information for a specific vendor."
     )
@@ -205,6 +208,7 @@ public class VendorServiceController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Update Vendor",
             description = "Updates the profile information of an existing vendor."
     )
@@ -231,6 +235,7 @@ public class VendorServiceController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Delete Vendor",
             description = "Deletes a vendor from the system if the vendor has no active business dependencies."
     )
@@ -256,6 +261,7 @@ public class VendorServiceController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Activate Vendor",
             description = "Activates an inactive vendor, allowing the vendor to receive new bookings again."
     )
@@ -286,6 +292,7 @@ public class VendorServiceController {
         );
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Remove Vendor Service",
             description = "Removes a previously assigned service from the specified vendor."
     )
@@ -317,6 +324,7 @@ public class VendorServiceController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Update Vendor Service",
             description = "Updates the price and estimated duration of a service assigned to a vendor."
     )
@@ -349,6 +357,7 @@ public class VendorServiceController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Search Vendor Services",
             description = "Searches vendors by vendor name, service name or a combination of both."
     )
@@ -377,6 +386,7 @@ public class VendorServiceController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get Vendor Service",
             description = "Retrieves details of a specific service assigned to a vendor."
     )
@@ -407,6 +417,7 @@ public class VendorServiceController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get Vendor Dashboard Summary",
             description = "Retrieves booking and service statistics for the specified vendor."
     )
@@ -431,7 +442,8 @@ public class VendorServiceController {
                 HttpStatus.OK);
     }
     @Operation(
-            summary = "Get Total Vendors",
+            tags = {"4. 👨‍💼 Administrator APIs"},
+            summary = "Get Total Vendors Count",
             description = "Returns the total number of vendors registered in the system."
     )
     @ApiResponses({
@@ -448,6 +460,7 @@ public class VendorServiceController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"3. 🛠 Vendor APIs"},
             summary = "Get My Profile",
             description = "Retrieves the profile information of the authenticated vendor."
     )
@@ -469,6 +482,7 @@ public class VendorServiceController {
         );
     }
     @Operation(
+            tags = {"3. 🛠 Vendor APIs"},
             summary = "Update My Profile",
             description = "Allows the authenticated vendor to update their editable profile information."
     )
@@ -492,6 +506,7 @@ public class VendorServiceController {
         );
     }
     @Operation(
+            tags = {"3. 🛠 Vendor APIs"},
             summary = "Get My Dashboard",
             description = "Retrieves booking statistics and dashboard summary for the authenticated vendor."
     )
@@ -512,6 +527,7 @@ public class VendorServiceController {
         );
     }
     @Operation(
+            tags = {"3. 🛠 Vendor APIs"},
             summary = "Get My Services",
             description = "Retrieves all services currently offered by the authenticated vendor."
     )
@@ -533,6 +549,7 @@ public class VendorServiceController {
         );
     }
     @Operation(
+            tags = {"3. 🛠 Vendor APIs"},
             summary = "Get My Service",
             description = "Retrieves details of a specific service offered by the authenticated vendor."
     )
@@ -560,6 +577,7 @@ public class VendorServiceController {
         );
     }
     @Operation(
+            tags = {"3. 🛠 Vendor APIs"},
             summary = "Remove My Service",
             description = "Allows the logged-in vendor to remove one of their assigned services. A vendor must always have at least one active service."
     )

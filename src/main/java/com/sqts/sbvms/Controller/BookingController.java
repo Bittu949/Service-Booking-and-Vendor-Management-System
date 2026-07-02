@@ -15,10 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-@Tag(
-        name = "Booking Management",
-        description = "APIs for creating, assigning and managing service bookings."
-)
+
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 public class BookingController {
@@ -27,6 +24,7 @@ public class BookingController {
         this.bookingService = bookingService;
     }
     @Operation(
+            tags = {"2. 👤 Customer APIs"},
             summary = "Create Booking",
             description = "Creates a new booking request for the authenticated customer using the selected service, date, time slot and booking address."
     )
@@ -46,7 +44,8 @@ public class BookingController {
                 HttpStatus.CREATED);
     }
     @Operation(
-            summary = "Get Customer Booking",
+            tags = {"2. 👤 Customer APIs"},
+            summary = "Get my specific Booking",
             description = "Retrieves detailed information about a specific booking belonging to the authenticated customer."
     )
     @ApiResponses({
@@ -74,7 +73,8 @@ public class BookingController {
         );
     }
     @Operation(
-            summary = "Get Vendor Bookings",
+            tags = {"3. 🛠 Vendor APIs"},
+            summary = "Get My Bookings",
             description = "Retrieves all bookings assigned to the authenticated vendor."
     )
     @ApiResponses({
@@ -100,6 +100,7 @@ public class BookingController {
         );
     }
     @Operation(
+            tags = {"3. 🛠 Vendor APIs"},
             summary = "Update My Booking Status",
             description = "Allows the authenticated vendor to accept, reject, cancel or complete an assigned booking."
     )
@@ -147,6 +148,7 @@ public class BookingController {
         );
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get Pending Bookings",
             description = "Retrieves all booking requests that are currently awaiting vendor assignment by an administrator."
     )
@@ -165,6 +167,7 @@ public class BookingController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get Available Vendors",
             description = "Retrieves all active vendors available for assignment to a pending booking, with optional nearby filtering based on the customer's pincode."
     )
@@ -200,6 +203,7 @@ public class BookingController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Assign Vendor To Booking",
             description = "Assigns an available vendor to a pending booking, calculates the final price and changes the booking status to CONFIRMED. The assigned vendor can then accept or reject the booking."
     )
@@ -233,6 +237,7 @@ public class BookingController {
         );
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get Booking Details",
             description = "Retrieves complete details of a booking, including assigned vendor information, final price and current booking status."
     )
@@ -257,6 +262,7 @@ public class BookingController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get Customer Booking History",
             description = "Retrieves the complete booking history of a specific customer."
     )
@@ -282,6 +288,7 @@ public class BookingController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Cancel Booking",
             description = "Allows the administrator to cancel a pending or confirmed booking before the vendor starts the service."
     )
@@ -320,6 +327,7 @@ public class BookingController {
         );
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get Vendor Booking History",
             description = "Retrieves the complete booking history of a specific vendor."
     )
@@ -345,6 +353,7 @@ public class BookingController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Filter Bookings",
             description = "Retrieves bookings filtered by booking status and/or booking date. Supported statuses include PENDING, CONFIRMED, IN_PROGRESS, COMPLETED and CANCELLED."
     )
@@ -388,7 +397,8 @@ public class BookingController {
                 HttpStatus.OK);
     }
     @Operation(
-            summary = "Get Total Bookings",
+            tags = {"4. 👨‍💼 Administrator APIs"},
+            summary = "Get Total Bookings Count",
             description = "Returns the total number of bookings in the system."
     )
     @ApiResponses({
@@ -405,6 +415,7 @@ public class BookingController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"2. 👤 Customer APIs"},
             summary = "Get My Booking History",
             description = "Retrieves the complete booking history of the authenticated customer."
     )
@@ -430,6 +441,7 @@ public class BookingController {
         );
     }
     @Operation(
+            tags = {"2. 👤 Customer APIs"},
             summary = "Cancel My Booking",
             description = "Allows the authenticated customer to cancel one of their pending or confirmed bookings before the assigned vendor starts the service."
     )

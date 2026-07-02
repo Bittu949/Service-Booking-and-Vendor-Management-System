@@ -14,10 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-@Tag(
-        name = "Service Management",
-        description = "APIs for managing service categories and browsing available services."
-)
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 public class ServiceCategoryController {
@@ -26,6 +22,7 @@ public class ServiceCategoryController {
         this.serviceCategoryService = serviceCategoryService;
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Create Service Category",
             description = "Creates a new service category that vendors can later offer and customers can book."
     )
@@ -47,6 +44,11 @@ public class ServiceCategoryController {
                 HttpStatus.CREATED);
     }
     @Operation(
+            tags = {
+                    "2. 👤 Customer APIs",
+                    "3. 🛠 Vendor APIs",
+                    "4. 👨‍💼 Administrator APIs"
+            },
             summary = "Get All Service Categories",
             description = "Retrieves all available service categories in the system."
     )
@@ -65,6 +67,7 @@ public class ServiceCategoryController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Update Service Category",
             description = "Updates the name or description of an existing service category."
     )
@@ -92,6 +95,7 @@ public class ServiceCategoryController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Delete Service Category",
             description = "Deletes a service category if it is not currently assigned to any vendor."
     )
@@ -117,6 +121,11 @@ public class ServiceCategoryController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {
+                    "2. 👤 Customer APIs",
+                    "3. 🛠 Vendor APIs",
+                    "4. 👨‍💼 Administrator APIs"
+            },
             summary = "Get Service Category by ID",
             description = "Retrieves the details of a specific service category."
     )
@@ -141,6 +150,7 @@ public class ServiceCategoryController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get Vendors by Service Category",
             description = "Retrieves all active vendors offering the specified service with optional price filtering and sorting."
     )
@@ -181,6 +191,7 @@ public class ServiceCategoryController {
                 HttpStatus.OK);
     }
     @Operation(
+            tags = {"4. 👨‍💼 Administrator APIs"},
             summary = "Get Service Category Count",
             description = "Returns the total number of service categories available in the system."
     )

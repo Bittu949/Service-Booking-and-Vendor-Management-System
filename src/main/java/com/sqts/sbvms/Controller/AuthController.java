@@ -17,7 +17,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 
 @Tag(
-        name = "Authentication",
+        name = "1. 🔐 Authentication",
         description = "APIs for customer registration and user authentication."
 )
 @RestController
