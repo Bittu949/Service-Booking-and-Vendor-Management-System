@@ -25,13 +25,13 @@ public class SearchResponse {
 
     @Schema(
             description = "Full name of the vendor.",
-            example = "Rahul Sharma"
+            example = "Bittu Naik"
     )
     private String vendorName;
 
     @Schema(
             description = "Email address of the vendor.",
-            example = "rahul@gmail.com"
+            example = "bittu123@gmail.com"
     )
     private String vendorEmail;
 

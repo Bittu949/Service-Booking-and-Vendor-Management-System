@@ -44,19 +44,19 @@ public class AdminBookingHistoryResponse {
     @Schema(example = "5")
     private Long customerId;
 
-    @Schema(example = "Suraj Patil")
+    @Schema(example = "Bittu Naik")
     private String customerName;
 
-    @Schema(example = "suraj@gmail.com")
+    @Schema(example = "bittu@gmail.com")
     private String customerEmail;
 
     @Schema(example = "12")
     private Long vendorId;
 
-    @Schema(example = "Rahul Sharma")
+    @Schema(example = "Kittu naik")
     private String vendorName;
 
-    @Schema(example = "rahul@gmail.com")
+    @Schema(example = "bittu@gmail.com")
     private String vendorEmail;
 
     @Valid

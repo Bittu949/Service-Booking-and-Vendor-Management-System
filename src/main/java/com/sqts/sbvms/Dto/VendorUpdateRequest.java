@@ -22,7 +22,7 @@ public class VendorUpdateRequest {
 
     @Schema(
             description = "Updated full name of the vendor.",
-            example = "Rahul Sharma",
+            example = "Bittu Naik",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     @NotBlank
@@ -30,7 +30,7 @@ public class VendorUpdateRequest {
 
     @Schema(
             description = "Updated account password.",
-            example = "Rahul@123",
+            example = "bittu@123",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     @NotBlank

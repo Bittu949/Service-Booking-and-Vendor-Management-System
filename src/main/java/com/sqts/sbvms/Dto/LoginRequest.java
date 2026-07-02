@@ -20,7 +20,7 @@ public class LoginRequest {
 
     @Schema(
             description = "Registered email address of the user.",
-            example = "suraj@gmail.com",
+            example = "bittu123@gmail.com",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     @NotBlank
@@ -29,7 +29,7 @@ public class LoginRequest {
 
     @Schema(
             description = "Account password.",
-            example = "Suraj@123",
+            example = "bittu@123",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     @NotBlank

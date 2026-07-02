@@ -26,7 +26,7 @@ public class VendorUpdateResponse {
 
     @Schema(
             description = "Updated full name of the vendor.",
-            example = "Rahul Sharma"
+            example = "Bittu Naik"
     )
     private String vendorName;
 

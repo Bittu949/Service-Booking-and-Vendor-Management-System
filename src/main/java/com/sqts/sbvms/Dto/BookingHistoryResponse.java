@@ -66,7 +66,7 @@ public class BookingHistoryResponse {
 
     @Schema(
             description = "Name of the assigned vendor.",
-            example = "Rahul Sharma"
+            example = "Bittu Naik"
     )
     private String vendorName;
 

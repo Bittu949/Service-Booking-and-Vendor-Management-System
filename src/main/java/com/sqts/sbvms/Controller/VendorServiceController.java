@@ -359,7 +359,7 @@ public class VendorServiceController {
     public ResponseEntity<ApiResponse<List<SearchResponse>>> searchVendorServicesByVendorOrService(
             @Parameter(
                     description = "Vendor name to search",
-                    example = "Rahul"
+                    example = "Bittu"
             )
             @RequestParam(name = "vendorName", required = false) String vendorName,
             @Parameter(

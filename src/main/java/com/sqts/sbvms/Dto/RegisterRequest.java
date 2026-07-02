@@ -21,7 +21,7 @@ public class RegisterRequest {
 
     @Schema(
             description = "Full name of the customer.",
-            example = "Suraj Patil",
+            example = "Bittu Naik",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     @NotBlank
@@ -29,7 +29,7 @@ public class RegisterRequest {
 
     @Schema(
             description = "Email address of the customer.",
-            example = "suraj@gmail.com",
+            example = "bittu123@gmail.com",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     @Email(message = "Invalid email address")
@@ -38,7 +38,7 @@ public class RegisterRequest {
 
     @Schema(
             description = "Password for the customer account. Must contain at least 8 characters.",
-            example = "Suraj@123",
+            example = "bittu@123",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     @NotBlank
@@ -47,7 +47,7 @@ public class RegisterRequest {
 
     @Schema(
             description = "Confirmation of the password entered above.",
-            example = "Suraj@123",
+            example = "bittu@123",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     @NotBlank

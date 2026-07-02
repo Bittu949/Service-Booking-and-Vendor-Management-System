@@ -25,7 +25,7 @@ public class VendorRegistrationResponse {
 
     @Schema(
             description = "Full name of the registered vendor.",
-            example = "Rahul Sharma"
+            example = "Bittu Naik"
     )
     private String vendorName;
 

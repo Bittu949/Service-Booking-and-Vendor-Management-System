@@ -34,7 +34,7 @@ public class AssignVendorResponse {
 
     @Schema(
             description = "Name of the assigned vendor.",
-            example = "Rahul Sharma"
+            example = "Kittu Naik"
     )
     private String vendorName;
 

@@ -18,7 +18,7 @@ public class ServiceUpdationResponse {
 
     @Schema(
             description = "Name of the vendor.",
-            example = "Rahul Sharma"
+            example = "Bittu Naik"
     )
     private String vendorName;
 

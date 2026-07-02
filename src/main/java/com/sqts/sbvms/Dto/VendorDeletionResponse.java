@@ -18,13 +18,13 @@ public class VendorDeletionResponse {
 
     @Schema(
             description = "Name of the deleted vendor.",
-            example = "Rahul Sharma"
+            example = "Bittu Naik"
     )
     private String vendorName;
 
     @Schema(
             description = "Email address of the deleted vendor.",
-            example = "rahul@gmail.com"
+            example = "bittu123@gmail.com"
     )
     private String vendorEmail;
 }

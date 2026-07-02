@@ -21,16 +21,16 @@ import org.springframework.web.multipart.MultipartFile;
 public class VendorRegistrationMultipartRequest {
 
     @NotBlank
-    @Schema(example = "Rahul Sharma")
+    @Schema(example = "Bittu Naik")
     private String name;
 
     @NotBlank
     @Email
-    @Schema(example = "rahul@gmail.com")
+    @Schema(example = "bittu123@gmail.com")
     private String email;
 
     @NotBlank
-    @Schema(example = "Rahul@123")
+    @Schema(example = "bittu@123")
     private String password;
 
     @NotBlank

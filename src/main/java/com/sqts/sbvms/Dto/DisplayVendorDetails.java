@@ -23,14 +23,14 @@ public class DisplayVendorDetails {
 
     @Schema(
             description = "Full name of the vendor.",
-            example = "Rahul Sharma"
+            example = "Bittu Naik"
     )
     @NotBlank
     private String vendorName;
 
     @Schema(
             description = "Email address of the vendor.",
-            example = "rahul@gmail.com"
+            example = "bittu123@gmail.com"
     )
     @NotBlank
     private String vendorEmail;

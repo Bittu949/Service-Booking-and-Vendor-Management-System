@@ -72,7 +72,7 @@ public class BookingDetailsResponse {
 
     @Schema(
             description = "Name of the assigned vendor.",
-            example = "Rahul Sharma"
+            example = "Bittu naik"
     )
     private String vendorName;
 

@@ -30,7 +30,7 @@ public class BookingResponse {
 
     @Schema(
             description = "Name of the customer who created the booking.",
-            example = "Suraj Patil"
+            example = "Bittu Naik"
     )
     private String customerName;
 

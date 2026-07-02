@@ -33,13 +33,13 @@ public class AvailableVendorResponse {
 
     @Schema(
             description = "Name of the vendor.",
-            example = "Rahul Sharma"
+            example = "Bittu Naik"
     )
     private String vendorName;
 
     @Schema(
             description = "Email address of the vendor.",
-            example = "rahul@gmail.com"
+            example = "bittu@gmail.com"
     )
     private String vendorEmail;
 
