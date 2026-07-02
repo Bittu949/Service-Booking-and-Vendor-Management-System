@@ -7,8 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.Duration;
 @Schema(
         name = "SearchResponse",
         description = "Details of a vendor returned by the vendor search operation."

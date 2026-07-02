@@ -3,8 +3,6 @@ package com.sqts.sbvms.Dto;
 import com.sqts.sbvms.Enum.BookingStatus;
 import com.sqts.sbvms.Model.Address;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

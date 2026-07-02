@@ -9,8 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Duration;
-
 @Schema(
         name = "VendorServiceRegistrationRequest",
         description = "Represents a service offered by the vendor along with its price and estimated duration."

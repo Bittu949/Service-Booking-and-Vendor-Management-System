@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Duration;
-
 @Schema(
         name = "VendorServiceDetails",
         description = "Details of a service currently assigned to a vendor."

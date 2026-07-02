@@ -5,7 +5,6 @@ import com.sqts.sbvms.Entity.ServiceCategory;
 import com.sqts.sbvms.Entity.User;
 import com.sqts.sbvms.Entity.Vendor;
 import com.sqts.sbvms.Entity.VendorService;
-import com.sqts.sbvms.Enum.Role;
 import com.sqts.sbvms.Enum.VendorStatus;
 import com.sqts.sbvms.Exception.*;
 import com.sqts.sbvms.Repository.ServiceCategoryRepository;
@@ -16,7 +15,6 @@ import com.sqts.sbvms.Security.CustomUserDetails;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

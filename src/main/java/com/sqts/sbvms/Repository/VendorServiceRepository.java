@@ -1,7 +1,6 @@
 package com.sqts.sbvms.Repository;
 
 import com.sqts.sbvms.Entity.ServiceCategory;
-import com.sqts.sbvms.Entity.Vendor;
 import com.sqts.sbvms.Entity.VendorService;
 import org.springframework.data.jpa.repository.JpaRepository;
 

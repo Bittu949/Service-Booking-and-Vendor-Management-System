@@ -1,6 +1,5 @@
 package com.sqts.sbvms.Dto;
 
-import com.sqts.sbvms.Entity.Vendor;
 import com.sqts.sbvms.Model.Address;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;

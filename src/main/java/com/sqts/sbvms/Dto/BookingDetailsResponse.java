@@ -2,15 +2,12 @@ package com.sqts.sbvms.Dto;
 
 import com.sqts.sbvms.Enum.BookingStatus;
 import com.sqts.sbvms.Model.Address;
-import com.sqts.sbvms.Model.TimeSlot;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

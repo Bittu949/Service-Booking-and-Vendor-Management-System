@@ -311,13 +311,11 @@ public class BookingService {
                 vendorServiceRepository.findByServiceCategoryId(
                         serviceCategory.getId());
 
-        // Only ACTIVE vendors
         vendorServices = vendorServices.stream()
                 .filter(v ->
                         v.getVendor().getStatus() == VendorStatus.ACTIVE)
                 .toList();
 
-        // Nearby vendors only
         if (nearby) {
 
             vendorServices = vendorServices.stream()
@@ -697,14 +695,12 @@ public class BookingService {
 
         List<Booking> bookings = bookingRepository.findAll();
 
-        // Filter by booking status
         if (bookingStatus != null) {
             bookings = bookings.stream()
                     .filter(b -> b.getStatus() == bookingStatus)
                     .toList();
         }
 
-        // Filter by booking date
         if (bookingDate != null) {
             bookings = bookings.stream()
                     .filter(b -> b.getBookingDate().equals(bookingDate))
@@ -719,7 +715,6 @@ public class BookingService {
             AdminBookingHistoryResponse response =
                     new AdminBookingHistoryResponse();
 
-            // Booking Details
             response.setBookingId(booking.getId());
             response.setBookingDate(booking.getBookingDate());
             response.setBookingStatus(booking.getStatus());
@@ -730,7 +725,6 @@ public class BookingService {
             response.setBookingAddress(
                     booking.getBookingAddress());
 
-            // Customer Details
             response.setCustomerId(
                     booking.getUser().getId());
             response.setCustomerName(
@@ -738,13 +732,11 @@ public class BookingService {
             response.setCustomerEmail(
                     booking.getUser().getEmail());
 
-            // Booking Timeline
             response.setAssignedAt(
                     booking.getAssignedAt());
             response.setCompletedAt(
                     booking.getCompletedAt());
 
-            // Vendor Details (if assigned)
             VendorService vendorService = booking.getVendorService();
 
             if (vendorService != null) {

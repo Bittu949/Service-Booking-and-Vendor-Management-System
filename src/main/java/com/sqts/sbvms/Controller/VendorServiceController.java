@@ -1,9 +1,6 @@
 package com.sqts.sbvms.Controller;
 
 import com.sqts.sbvms.Dto.*;
-import com.sqts.sbvms.Entity.User;
-import com.sqts.sbvms.Entity.Vendor;
-import com.sqts.sbvms.Entity.VendorService;
 import com.sqts.sbvms.Service.VendorServiceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
