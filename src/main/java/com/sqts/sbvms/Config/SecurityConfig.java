@@ -14,8 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import com.sqts.sbvms.Exception.CustomAccessDeniedHandler;
-import com.sqts.sbvms.Exception.CustomAuthenticationEntryPoint;
 
 @Configuration
 public class SecurityConfig {
@@ -33,9 +31,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            CustomAccessDeniedHandler accessDeniedHandler,
-            CustomAuthenticationEntryPoint authenticationEntryPoint) throws Exception {
+            JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/auth/register", "/auth/login", "/vendor/register", "/swagger-ui/**", "/v3/api-docs/**", "/test/**").permitAll()
@@ -86,9 +82,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/vendor/*/activate").hasAuthority("ROLE_ADMIN")
                     .anyRequest().authenticated()
                 )
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(authenticationEntryPoint)
-                        .accessDeniedHandler(accessDeniedHandler))
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);
         return http.build();
