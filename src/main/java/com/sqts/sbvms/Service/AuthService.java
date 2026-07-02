@@ -107,11 +107,16 @@ public class AuthService {
             throw new WeakPasswordException("Provided password is weak.");
 
         if (userRepository.existsByEmail(request.getEmail().trim()))
-            throw new UserAlreadyExistsException("Email already registered.");
+            throw new UserAlreadyExistsException(
+                    "Email already registered.");
 
         if (vendorRepository.existsByPhoneNumber(request.getPhoneNumber().trim()))
             throw new VendorAlreadyExistsException(
                     "Phone number already registered.");
+
+        if (vendorRepository.existsByAadhaarNumber(request.getAadhaarNumber().trim()))
+            throw new VendorAlreadyExistsException(
+                    "Aadhaar number already registered.");
 
         User user = new User();
         user.setName(request.getName().trim());

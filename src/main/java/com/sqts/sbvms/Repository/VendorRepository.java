@@ -12,4 +12,5 @@ public interface VendorRepository extends JpaRepository<Vendor, Long> {
     List<Vendor> findByStatus(VendorStatus status);
     boolean existsByPhoneNumber(String phoneNumber);
     long countByStatus(VendorStatus vendorStatus);
+    boolean existsByAadhaarNumber(String aadhaarNumber);
 }
